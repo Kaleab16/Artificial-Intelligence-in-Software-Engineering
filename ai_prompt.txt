@@ -1,0 +1,20 @@
+ACT AS: Senior C Developer specializing in memory safety and data structures.
+
+TASK:
+Review the following C function and identify all issues.
+
+Focus on:
+1. Logical errors in linked list insertion
+2. Memory safety issues (malloc, NULL usage)
+3. Error handling problems
+
+Explain:
+- Why the node is not correctly added
+- Why the code can crash (segmentation fault risk)
+- Why malloc failure must be checked
+- How traversal logic fails
+
+Then provide a fully corrected implementation of the function.
+
+CODE:
+[Insert initial_code.c here]
