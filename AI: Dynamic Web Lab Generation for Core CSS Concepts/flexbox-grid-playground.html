@@ -1,0 +1,851 @@
+<!DOCTYPE html>
+<html lang="en" class="dark">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>CSS Flexbox & Grid Playground Studio</title>
+
+    <!-- Tailwind CSS CDN -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <!-- FontAwesome Icons CDN -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+
+    <script>
+        tailwind.config = {
+            darkMode: 'class',
+            theme: {
+                extend: {
+                    colors: {
+                        brandFlex: '#06b6d4',  /* Cyan */
+                        brandGrid: '#8b5cf6',  /* Purple */
+                        brandBlock: '#f59e0b', /* Amber */
+                    }
+                }
+            }
+        }
+    </script>
+
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=Fira+Code:wght@400;500&display=swap'); 
+ 
+        body { 
+            font-family: 'Inter', sans-serif; 
+        } 
+ 
+        code, pre { 
+            font-family: 'Fira Code', monospace; 
+        } 
+ 
+        /* Range input thumb style */ 
+        input[type=range] { 
+            -webkit-appearance: none; 
+            background: transparent; 
+        } 
+        input[type=range]::-webkit-slider-thumb { 
+            -webkit-appearance: none; 
+            height: 16px; 
+            width: 16px; 
+            border-radius: 50%; 
+            background: #a855f7; 
+            cursor: pointer; 
+            margin-top: -5px; 
+            box-shadow: 0 0 8px rgba(168, 85, 247, 0.5); 
+            transition: all 0.15s ease; 
+        } 
+        input[type=range]::-webkit-slider-thumb:hover { 
+            transform: scale(1.2); 
+            background: #c084fc; 
+        } 
+        input[type=range]::-webkit-slider-runnable-track { 
+            width: 100%; 
+            height: 6px; 
+            cursor: pointer; 
+            background: #374151; 
+            border-radius: 3px; 
+        } 
+ 
+        /* Animated container items */ 
+        .playground-item { 
+            transition: all 0.25s cubic-bezier(0.4, 0, 0.2, 1); 
+        } 
+ 
+        .playground-item.selected { 
+            ring: 3px solid #38bdf8; 
+            box-shadow: 0 0 15px rgba(56, 189, 248, 0.4); 
+        } 
+ 
+        /* CSS code highlights */ 
+        .token-prop { color: #a5b4fc; } 
+        .token-val { color: #f43f5e; } 
+        .token-selector { color: #38bdf8; } 
+        .token-comment { color: #6b7280; font-style: italic; } 
+ 
+        .mode-btn.active-flex { 
+            background-color: rgba(6, 182, 212, 0.15); 
+            border-color: #06b6d4; 
+            color: #22d3ee; 
+        } 
+        .mode-btn.active-grid { 
+            background-color: rgba(139, 92, 246, 0.15); 
+            border-color: #8b5cf6; 
+            color: #a78bfa; 
+        } 
+        .mode-btn.active-block { 
+            background-color: rgba(245, 158, 11, 0.15); 
+            border-color: #f59e0b; 
+            color: #fbbf24; 
+        } 
+    </style> 
+</head> 
+<body class="bg-slate-950 text-slate-100 min-h-screen flex flex-col antialiased"> 
+ 
+    <!-- Top Navigation Header --> 
+    <header class="border-b border-slate-800 bg-slate-900/90 backdrop-blur sticky top-0 z-50"> 
+        <div class="max-w-7xl mx-auto px-4 py-3 sm:px-6 lg:px-8 flex items-center justify-between"> 
+            <div class="flex items-center space-x-3"> 
+                <div class="p-2 bg-gradient-to-tr from-cyan-500/20 to-purple-500/20 text-cyan-400 rounded-lg border border-cyan-500/30"> 
+                    <i class="fa-solid fa-border-all text-xl"></i> 
+                </div> 
+                <div> 
+                    <h1 class="font-bold text-lg text-white leading-tight">CSS Flexbox & Grid Playground</h1> 
+                    <p class="text-xs text-slate-400">Interactive Layout Engine & Code Studio</p> 
+                </div> 
+            </div> 
+            <div class="flex items-center space-x-2"> 
+                <button id="resetAllBtn" class="text-xs bg-slate-800 hover:bg-slate-700 text-slate-300 hover:text-white px-3 py-1.5 rounded-lg border border-slate-700 transition flex items-center gap-1.5"> 
+                    <i class="fa-solid fa-rotate-left"></i> Reset Playground 
+                </button> 
+            </div> 
+        </div> 
+    </header> 
+ 
+    <main class="flex-1 max-w-7xl w-full mx-auto p-4 sm:p-6 lg:p-8 grid grid-cols-1 lg:grid-cols-12 gap-6"> 
+ 
+        <!-- Left Column: Control Panel & Options --> 
+        <section class="lg:col-span-5 flex flex-col gap-5"> 
+             
+            <!-- Mode Switcher & Primary Controls Card --> 
+            <div class="bg-slate-900 border border-slate-800 rounded-xl p-5 shadow-xl space-y-5"> 
+                 
+                <div class="space-y-2"> 
+                    <label class="text-xs font-semibold uppercase tracking-wider text-slate-400 flex items-center justify-between"> 
+                        <span>Display Engine Mode</span> 
+                        <span id="activeModeBadge" class="text-xs font-mono text-cyan-400 font-bold">display: flex</span> 
+                    </label> 
+                    <div class="grid grid-cols-3 gap-2"> 
+                        <button type="button" data-mode="flex" class="mode-btn active-flex border rounded-lg py-2 px-3 text-xs font-semibold flex items-center justify-center gap-1.5 transition"> 
+                            <i class="fa-solid fa-boxes-stacked"></i> Flexbox 
+                        </button> 
+                        <button type="button" data-mode="grid" class="mode-btn border border-slate-800 bg-slate-950 text-slate-400 rounded-lg py-2 px-3 text-xs font-semibold flex items-center justify-center gap-1.5 transition hover:text-slate-200"> 
+                            <i class="fa-solid fa-table-cells"></i> Grid 
+                        </button> 
+                        <button type="button" data-mode="block" class="mode-btn border border-slate-800 bg-slate-950 text-slate-400 rounded-lg py-2 px-3 text-xs font-semibold flex items-center justify-center gap-1.5 transition hover:text-slate-200"> 
+                            <i class="fa-solid fa-square text-[10px]"></i> Block 
+                        </button> 
+                    </div> 
+                </div> 
+ 
+                <div class="space-y-4 pt-3 border-t border-slate-800"> 
+                    <h3 class="text-xs font-semibold uppercase tracking-wider text-slate-400 flex items-center gap-1.5"> 
+                        <i class="fa-solid fa-sliders text-cyan-400"></i> Container CSS Properties 
+                    </h3> 
+ 
+                    <!-- flex-direction (Flex mode) --> 
+                    <div id="controlFlexDirection" class="space-y-1.5"> 
+                        <label for="selectFlexDirection" class="text-xs font-medium text-slate-300 flex justify-between"> 
+                            <span>flex-direction</span> 
+                            <span class="text-slate-500 text-[11px] font-mono">row | column</span> 
+                        </label> 
+                        <select id="selectFlexDirection" class="w-full bg-slate-950 border border-slate-800 text-slate-200 text-xs rounded-lg p-2.5 focus:border-cyan-500 focus:ring-1 focus:ring-cyan-500 outline-none"> 
+                            <option value="row" selected>row (default)</option> 
+                            <option value="row-reverse">row-reverse</option> 
+                            <option value="column">column</option> 
+                            <option value="column-reverse">column-reverse</option> 
+                        </select> 
+                    </div> 
+ 
+                    <!-- flex-wrap (Flex mode) --> 
+                    <div id="controlFlexWrap" class="space-y-1.5"> 
+                        <label for="selectFlexWrap" class="text-xs font-medium text-slate-300 flex justify-between"> 
+                            <span>flex-wrap</span> 
+                            <span class="text-slate-500 text-[11px] font-mono">wrap | nowrap</span> 
+                        </label> 
+                        <select id="selectFlexWrap" class="w-full bg-slate-950 border border-slate-800 text-slate-200 text-xs rounded-lg p-2.5 focus:border-cyan-500 focus:ring-1 focus:ring-cyan-500 outline-none"> 
+                            <option value="nowrap" selected>nowrap (default)</option> 
+                            <option value="wrap">wrap</option> 
+                            <option value="wrap-reverse">wrap-reverse</option> 
+                        </select> 
+                    </div> 
+ 
+                    <!-- justify-content (Flex & Grid) --> 
+                    <div id="controlJustifyContent" class="space-y-1.5"> 
+                        <label for="selectJustifyContent" class="text-xs font-medium text-slate-300 flex justify-between"> 
+                            <span>justify-content</span> 
+                            <span class="text-slate-500 text-[11px] font-mono">main axis alignment</span> 
+                        </label> 
+                        <select id="selectJustifyContent" class="w-full bg-slate-950 border border-slate-800 text-slate-200 text-xs rounded-lg p-2.5 focus:border-cyan-500 focus:ring-1 focus:ring-cyan-500 outline-none"> 
+                            <option value="flex-start" selected>flex-start / start</option> 
+                            <option value="center">center</option> 
+                            <option value="flex-end">flex-end / end</option> 
+                            <option value="space-between">space-between</option> 
+                            <option value="space-around">space-around</option> 
+                            <option value="space-evenly">space-evenly</option> 
+                        </select> 
+                    </div> 
+ 
+                    <!-- align-items (Flex & Grid) --> 
+                    <div id="controlAlignItems" class="space-y-1.5"> 
+                        <label for="selectAlignItems" class="text-xs font-medium text-slate-300 flex justify-between"> 
+                            <span>align-items</span> 
+                            <span class="text-slate-500 text-[11px] font-mono">cross axis alignment</span> 
+                        </label> 
+                        <select id="selectAlignItems" class="w-full bg-slate-950 border border-slate-800 text-slate-200 text-xs rounded-lg p-2.5 focus:border-cyan-500 focus:ring-1 focus:ring-cyan-500 outline-none"> 
+                            <option value="stretch" selected>stretch (default)</option> 
+                            <option value="flex-start">flex-start / start</option> 
+                            <option value="center">center</option> 
+                            <option value="flex-end">flex-end / end</option> 
+                            <option value="baseline">baseline</option> 
+                        </select> 
+                    </div> 
+ 
+                    <!-- grid-template-columns (Grid mode) --> 
+                    <div id="controlGridColumns" class="space-y-1.5 hidden"> 
+                        <label for="selectGridColumns" class="text-xs font-medium text-purple-300 flex justify-between"> 
+                            <span>grid-template-columns</span> 
+                            <span class="text-slate-500 text-[11px] font-mono">column tracks</span> 
+                        </label> 
+                        <select id="selectGridColumns" class="w-full bg-slate-950 border border-slate-800 text-slate-200 text-xs rounded-lg p-2.5 focus:border-purple-500 focus:ring-1 focus:ring-purple-500 outline-none"> 
+                            <option value="repeat(2, 1fr)">repeat(2, 1fr) — 2 Columns</option> 
+                            <option value="repeat(3, 1fr)" selected>repeat(3, 1fr) — 3 Columns</option> 
+                            <option value="repeat(4, 1fr)">repeat(4, 1fr) — 4 Columns</option> 
+                            <option value="1fr 2fr 1fr">1fr 2fr 1fr — Weighted Middle</option> 
+                            <option value="200px 1fr">200px 1fr — Fixed Sidebar + Fluid</option> 
+                            <option value="repeat(auto-fit, minmax(100px, 1fr))">repeat(auto-fit, minmax(100px, 1fr))</option> 
+                        </select> 
+                    </div> 
+ 
+                    <!-- grid-template-rows (Grid mode) --> 
+                    <div id="controlGridRows" class="space-y-1.5 hidden"> 
+                        <label for="selectGridRows" class="text-xs font-medium text-purple-300 flex justify-between"> 
+                            <span>grid-template-rows</span> 
+                            <span class="text-slate-500 text-[11px] font-mono">row tracks</span> 
+                        </label> 
+                        <select id="selectGridRows" class="w-full bg-slate-950 border border-slate-800 text-slate-200 text-xs rounded-lg p-2.5 focus:border-purple-500 focus:ring-1 focus:ring-purple-500 outline-none"> 
+                            <option value="auto" selected>auto (default)</option> 
+                            <option value="repeat(2, minmax(80px, auto))">repeat(2, minmax(80px, auto))</option> 
+                            <option value="100px 120px auto">100px 120px auto</option> 
+                        </select> 
+                    </div> 
+ 
+                    <!-- grid-auto-flow (Grid mode) --> 
+                    <div id="controlGridAutoFlow" class="space-y-1.5 hidden"> 
+                        <label for="selectGridAutoFlow" class="text-xs font-medium text-purple-300 flex justify-between"> 
+                            <span>grid-auto-flow</span> 
+                            <span class="text-slate-500 text-[11px] font-mono">flow algorithm</span> 
+                        </label> 
+                        <select id="selectGridAutoFlow" class="w-full bg-slate-950 border border-slate-800 text-slate-200 text-xs rounded-lg p-2.5 focus:border-purple-500 focus:ring-1 focus:ring-purple-500 outline-none"> 
+                            <option value="row" selected>row (default)</option> 
+                            <option value="column">column</option> 
+                            <option value="row dense">row dense</option> 
+                            <option value="column dense">column dense</option> 
+                        </select> 
+                    </div> 
+ 
+                    <!-- gap control slider --> 
+                    <div class="space-y-1.5"> 
+                        <div class="flex justify-between text-xs"> 
+                            <label for="rangeGap" class="font-medium text-slate-300">gap (spacing)</label> 
+                            <span id="gapValTag" class="font-mono text-cyan-400">16px</span> 
+                        </div> 
+                        <input id="rangeGap" type="range" min="0" max="48" value="16" class="w-full"> 
+                    </div> 
+ 
+                </div> 
+ 
+                <!-- Items Management Section --> 
+                <div class="pt-3 border-t border-slate-800 space-y-3"> 
+                    <div class="flex items-center justify-between"> 
+                        <span class="text-xs font-semibold uppercase tracking-wider text-slate-400"> 
+                            Child Elements (<span id="itemCountTag" class="text-white">5</span>) 
+                        </span> 
+                        <div class="flex items-center gap-1.5"> 
+                            <button id="addItemBtn" class="bg-cyan-600 hover:bg-cyan-500 text-white text-xs px-2.5 py-1 rounded-md transition flex items-center gap-1"> 
+                                <i class="fa-solid fa-plus text-[10px]"></i> Add Item 
+                            </button> 
+                            <button id="removeItemBtn" class="bg-slate-800 hover:bg-rose-950/60 hover:text-rose-400 text-slate-300 text-xs px-2.5 py-1 rounded-md border border-slate-700 transition flex items-center gap-1"> 
+                                <i class="fa-solid fa-minus text-[10px]"></i> Remove 
+                            </button> 
+                        </div> 
+                    </div> 
+                </div> 
+ 
+            </div> 
+ 
+            <!-- Individual Selected Item Overrides Card --> 
+            <div id="itemInspectorCard" class="bg-slate-900 border border-slate-800 rounded-xl p-4 shadow-xl space-y-3"> 
+                <div class="flex justify-between items-center border-b border-slate-800 pb-2"> 
+                    <span class="text-xs font-semibold uppercase tracking-wider text-cyan-400 flex items-center gap-1.5"> 
+                        <i class="fa-solid fa-crosshairs"></i> <span id="inspectorTitle">Selected: Item 1</span> 
+                    </span> 
+                    <button id="clearSelectionBtn" class="text-[11px] text-slate-400 hover:text-white underline"> 
+                        Deselect 
+                    </button> 
+                </div> 
+ 
+                <div class="grid grid-cols-2 gap-3 text-xs"> 
+                    <!-- flex-grow --> 
+                    <div id="itemPropFlexGrow" class="space-y-1"> 
+                        <label for="inputFlexGrow" class="text-slate-400">flex-grow</label> 
+                        <input id="inputFlexGrow" type="number" min="0" max="10" value="0" class="w-full bg-slate-950 border border-slate-800 rounded p-1.5 text-slate-200 outline-none focus:border-cyan-500"> 
+                    </div> 
+                    <!-- flex-shrink --> 
+                    <div id="itemPropFlexShrink" class="space-y-1"> 
+                        <label for="inputFlexShrink" class="text-slate-400">flex-shrink</label> 
+                        <input id="inputFlexShrink" type="number" min="0" max="10" value="1" class="w-full bg-slate-950 border border-slate-800 rounded p-1.5 text-slate-200 outline-none focus:border-cyan-500"> 
+                    </div> 
+                    <!-- align-self --> 
+                    <div class="col-span-2 space-y-1"> 
+                        <label for="selectAlignSelf" class="text-slate-400">align-self</label> 
+                        <select id="selectAlignSelf" class="w-full bg-slate-950 border border-slate-800 rounded p-1.5 text-slate-200 outline-none focus:border-cyan-500"> 
+                            <option value="auto">auto (inherit)</option> 
+                            <option value="flex-start">flex-start / start</option> 
+                            <option value="center">center</option> 
+                            <option value="flex-end">flex-end / end</option> 
+                            <option value="stretch">stretch</option> 
+                        </select> 
+                    </div> 
+                    <!-- grid-column span (Grid mode) --> 
+                    <div id="itemPropGridCol" class="col-span-2 space-y-1 hidden"> 
+                        <label for="selectGridColSpan" class="text-slate-400">grid-column</label> 
+                        <select id="selectGridColSpan" class="w-full bg-slate-950 border border-slate-800 rounded p-1.5 text-slate-200 outline-none focus:border-purple-500"> 
+                            <option value="auto">auto</option> 
+                            <option value="span 2">span 2</option> 
+                            <option value="span 3">span 3</option> 
+                            <option value="1 / -1">1 / -1 (Full Width)</option> 
+                        </select> 
+                    </div> 
+                </div> 
+            </div> 
+ 
+        </section> 
+ 
+        <!-- Right Column: Interactive Canvas & CSS Code Output --> 
+        <section class="lg:col-span-7 flex flex-col gap-5"> 
+ 
+            <!-- Contextual Educational Insight Banner --> 
+            <div id="insightBanner" class="bg-cyan-950/30 border border-cyan-500/30 rounded-xl p-4 flex gap-3 items-start transition-all"> 
+                <i class="fa-solid fa-lightbulb text-cyan-400 text-lg mt-0.5 shrink-0"></i> 
+                <div> 
+                    <h3 id="insightTitle" class="text-sm font-semibold text-cyan-200">Flexbox Layout Engine</h3> 
+                    <p id="insightDesc" class="text-xs text-slate-300 mt-0.5 leading-relaxed"> 
+                        Flexbox excels at 1-dimensional layouts (rows OR columns). Items automatically shrink or grow based on available space along the main axis. 
+                    </p> 
+                </div> 
+            </div> 
+ 
+            <!-- Playground Container Canvas Window --> 
+            <div class="bg-slate-900 border border-slate-800 rounded-xl p-5 shadow-xl flex flex-col min-h-[420px]"> 
+                 
+                <div class="flex justify-between items-center mb-3 text-xs text-slate-400 border-b border-slate-800 pb-2"> 
+                    <span class="flex items-center gap-2 font-mono"> 
+                        <i class="fa-solid fa-square-parking text-cyan-400"></i> &lt;div class="container"&gt; 
+                    </span> 
+                    <span id="canvasDims" class="font-mono text-[11px] text-slate-500">interactive viewport</span> 
+                </div> 
+ 
+                <!-- Dynamic Target Container Div --> 
+                <div id="playgroundContainer" class="flex-1 bg-slate-950 rounded-xl border-2 border-dashed border-slate-800 p-4 transition-all overflow-auto min-h-[300px]"> 
+                    <!-- Items dynamically rendered by JavaScript --> 
+                </div> 
+ 
+                <div class="mt-3 pt-2 text-[11px] text-slate-500 flex items-center justify-between"> 
+                    <span><i class="fa-solid fa-hand-pointer text-slate-400"></i> Click any item to inspect/override individual properties</span> 
+                    <span class="font-mono text-slate-600">parent height: 100%</span> 
+                </div> 
+            </div> 
+ 
+            <!-- Generated CSS Code Block --> 
+            <div class="bg-slate-900 border border-slate-800 rounded-xl p-4 shadow-xl space-y-2"> 
+                <div class="flex justify-between items-center"> 
+                    <span class="text-xs font-semibold uppercase tracking-wider text-slate-400 flex items-center gap-1.5"> 
+                        <i class="fa-solid fa-code text-cyan-400"></i> Generated CSS Rule 
+                    </span> 
+                    <button id="copyCssBtn" class="text-xs text-slate-400 hover:text-white flex items-center gap-1.5 bg-slate-800 hover:bg-slate-700 px-2.5 py-1 rounded-md border border-slate-700 transition"> 
+                        <i class="fa-regular fa-copy"></i> Copy CSS 
+                    </button> 
+                </div> 
+                <pre class="bg-slate-950 p-3.5 rounded-lg text-xs font-mono text-slate-300 border border-slate-800/80 overflow-x-auto"><code id="cssOutputCode">.container { ... }</code></pre> 
+            </div> 
+ 
+        </section> 
+ 
+    </main> 
+ 
+    <script> 
+        document.addEventListener('DOMContentLoaded', () => { 
+             
+            // Core Playground State 
+            const state = { 
+                display: 'flex', // 'flex', 'grid', 'block' 
+                flexDirection: 'row', 
+                flexWrap: 'nowrap', 
+                justifyContent: 'flex-start', 
+                alignItems: 'stretch', 
+                gridColumns: 'repeat(3, 1fr)', 
+                gridRows: 'auto', 
+                gridAutoFlow: 'row', 
+                gap: 16, 
+                itemsCount: 5, 
+                selectedIndex: 0, 
+                // Individual item overrides indexed by 0-based index 
+                itemOverrides: [ 
+                    { flexGrow: 0, flexShrink: 1, alignSelf: 'auto', gridColSpan: 'auto' }, 
+                    { flexGrow: 0, flexShrink: 1, alignSelf: 'auto', gridColSpan: 'auto' }, 
+                    { flexGrow: 0, flexShrink: 1, alignSelf: 'auto', gridColSpan: 'auto' }, 
+                    { flexGrow: 0, flexShrink: 1, alignSelf: 'auto', gridColSpan: 'auto' }, 
+                    { flexGrow: 0, flexShrink: 1, alignSelf: 'auto', gridColSpan: 'auto' } 
+                ] 
+            }; 
+ 
+            // Color palette for items 
+            const itemColors = [ 
+                { bg: 'bg-cyan-950/60', border: 'border-cyan-500/60', text: 'text-cyan-300', numBg: 'bg-cyan-500' }, 
+                { bg: 'bg-purple-950/60', border: 'border-purple-500/60', text: 'text-purple-300', numBg: 'bg-purple-500' }, 
+                { bg: 'bg-emerald-950/60', border: 'border-emerald-500/60', text: 'text-emerald-300', numBg: 'bg-emerald-500' }, 
+                { bg: 'bg-amber-950/60', border: 'border-amber-500/60', text: 'text-amber-300', numBg: 'bg-amber-500' }, 
+                { bg: 'bg-rose-950/60', border: 'border-rose-500/60', text: 'text-rose-300', numBg: 'bg-rose-500' }, 
+                { bg: 'bg-indigo-950/60', border: 'border-indigo-500/60', text: 'text-indigo-300', numBg: 'bg-indigo-500' }, 
+                { bg: 'bg-teal-950/60', border: 'border-teal-500/60', text: 'text-teal-300', numBg: 'bg-teal-500' }, 
+                { bg: 'bg-fuchsia-950/60', border: 'border-fuchsia-500/60', text: 'text-fuchsia-300', numBg: 'bg-fuchsia-500' } 
+            ]; 
+ 
+            // DOM Elements 
+            const container = document.getElementById('playgroundContainer'); 
+            const modeBtns = document.querySelectorAll('.mode-btn'); 
+            const activeModeBadge = document.getElementById('activeModeBadge'); 
+ 
+            // Select Dropdowns 
+            const selectFlexDirection = document.getElementById('selectFlexDirection'); 
+            const selectFlexWrap = document.getElementById('selectFlexWrap'); 
+            const selectJustifyContent = document.getElementById('selectJustifyContent'); 
+            const selectAlignItems = document.getElementById('selectAlignItems'); 
+            const selectGridColumns = document.getElementById('selectGridColumns'); 
+            const selectGridRows = document.getElementById('selectGridRows'); 
+            const selectGridAutoFlow = document.getElementById('selectGridAutoFlow'); 
+            const rangeGap = document.getElementById('rangeGap'); 
+            const gapValTag = document.getElementById('gapValTag'); 
+ 
+            // Control Container Divs 
+            const controlFlexDirection = document.getElementById('controlFlexDirection'); 
+            const controlFlexWrap = document.getElementById('controlFlexWrap'); 
+            const controlJustifyContent = document.getElementById('controlJustifyContent'); 
+            const controlAlignItems = document.getElementById('controlAlignItems'); 
+            const controlGridColumns = document.getElementById('controlGridColumns'); 
+            const controlGridRows = document.getElementById('controlGridRows'); 
+            const controlGridAutoFlow = document.getElementById('controlGridAutoFlow'); 
+ 
+            // Item Buttons & Tags 
+            const addItemBtn = document.getElementById('addItemBtn'); 
+            const removeItemBtn = document.getElementById('removeItemBtn'); 
+            const itemCountTag = document.getElementById('itemCountTag'); 
+            const resetAllBtn = document.getElementById('resetAllBtn'); 
+ 
+            // Item Inspector Elements 
+            const inspectorTitle = document.getElementById('inspectorTitle'); 
+            const inputFlexGrow = document.getElementById('inputFlexGrow'); 
+            const inputFlexShrink = document.getElementById('inputFlexShrink'); 
+            const selectAlignSelf = document.getElementById('selectAlignSelf'); 
+            const selectGridColSpan = document.getElementById('selectGridColSpan'); 
+            const itemPropFlexGrow = document.getElementById('itemPropFlexGrow'); 
+            const itemPropFlexShrink = document.getElementById('itemPropFlexShrink'); 
+            const itemPropGridCol = document.getElementById('itemPropGridCol'); 
+            const clearSelectionBtn = document.getElementById('clearSelectionBtn'); 
+ 
+            // Output & Insights 
+            const cssOutputCode = document.getElementById('cssOutputCode'); 
+            const copyCssBtn = document.getElementById('copyCssBtn'); 
+            const insightTitle = document.getElementById('insightTitle'); 
+            const insightDesc = document.getElementById('insightDesc'); 
+ 
+            const modeInsights = { 
+                'flex': { 
+                    title: 'Flexbox Layout Engine', 
+                    desc: 'Flexbox is ideal for 1-dimensional layouts (rows or columns). It automatically distributes space and aligns items along main and cross axes.' 
+                }, 
+                'grid': { 
+                    title: 'CSS Grid Layout Engine', 
+                    desc: 'CSS Grid is a 2-dimensional system for rows AND columns simultaneously. Define track templates with fr units, minmax(), or repeat().' 
+                }, 
+                'block': { 
+                    title: 'Standard Block Flow', 
+                    desc: 'Standard CSS block flow stacks elements vertically. Each block element takes full available container width by default.' 
+                } 
+            }; 
+ 
+            function render() { 
+                // 1. Toggle Control Visibility based on mode 
+                if (state.display === 'flex') { 
+                    controlFlexDirection.classList.remove('hidden'); 
+                    controlFlexWrap.classList.remove('hidden'); 
+                    controlJustifyContent.classList.remove('hidden'); 
+                    controlAlignItems.classList.remove('hidden'); 
+ 
+                    controlGridColumns.classList.add('hidden'); 
+                    controlGridRows.classList.add('hidden'); 
+                    controlGridAutoFlow.classList.add('hidden'); 
+ 
+                    itemPropFlexGrow.classList.remove('hidden'); 
+                    itemPropFlexShrink.classList.remove('hidden'); 
+                    itemPropGridCol.classList.add('hidden'); 
+ 
+                    activeModeBadge.textContent = 'display: flex'; 
+                    activeModeBadge.className = 'text-xs font-mono text-cyan-400 font-bold'; 
+                } else if (state.display === 'grid') { 
+                    controlFlexDirection.classList.add('hidden'); 
+                    controlFlexWrap.classList.add('hidden'); 
+                    controlJustifyContent.classList.remove('hidden'); 
+                    controlAlignItems.classList.remove('hidden'); 
+ 
+                    controlGridColumns.classList.remove('hidden'); 
+                    controlGridRows.classList.remove('hidden'); 
+                    controlGridAutoFlow.classList.remove('hidden'); 
+ 
+                    itemPropFlexGrow.classList.add('hidden'); 
+                    itemPropFlexShrink.classList.add('hidden'); 
+                    itemPropGridCol.classList.remove('hidden'); 
+ 
+                    activeModeBadge.textContent = 'display: grid'; 
+                    activeModeBadge.className = 'text-xs font-mono text-purple-400 font-bold'; 
+                } else { 
+                    // block 
+                    controlFlexDirection.classList.add('hidden'); 
+                    controlFlexWrap.classList.add('hidden'); 
+                    controlJustifyContent.classList.add('hidden'); 
+                    controlAlignItems.classList.add('hidden'); 
+ 
+                    controlGridColumns.classList.add('hidden'); 
+                    controlGridRows.classList.add('hidden'); 
+                    controlGridAutoFlow.classList.add('hidden'); 
+ 
+                    itemPropFlexGrow.classList.add('hidden'); 
+                    itemPropFlexShrink.classList.add('hidden'); 
+                    itemPropGridCol.classList.add('hidden'); 
+ 
+                    activeModeBadge.textContent = 'display: block'; 
+                    activeModeBadge.className = 'text-xs font-mono text-amber-400 font-bold'; 
+                } 
+ 
+                // 2. Apply Container CSS Styles 
+                container.style.display = state.display; 
+                container.style.gap = `${state.gap}px`; 
+ 
+                if (state.display === 'flex') { 
+                    container.style.flexDirection = state.flexDirection; 
+                    container.style.flexWrap = state.flexWrap; 
+                    container.style.justifyContent = state.justifyContent; 
+                    container.style.alignItems = state.alignItems; 
+ 
+                    // reset grid props 
+                    container.style.gridTemplateColumns = ''; 
+                    container.style.gridTemplateRows = ''; 
+                    container.style.gridAutoFlow = ''; 
+                } else if (state.display === 'grid') { 
+                    container.style.gridTemplateColumns = state.gridColumns; 
+                    container.style.gridTemplateRows = state.gridRows; 
+                    container.style.gridAutoFlow = state.gridAutoFlow; 
+                    container.style.justifyContent = state.justifyContent; 
+                    container.style.alignItems = state.alignItems; 
+ 
+                    // reset flex props 
+                    container.style.flexDirection = ''; 
+                    container.style.flexWrap = ''; 
+                } else { 
+                    // reset all 
+                    container.style.flexDirection = ''; 
+                    container.style.flexWrap = ''; 
+                    container.style.justifyContent = ''; 
+                    container.style.alignItems = ''; 
+                    container.style.gridTemplateColumns = ''; 
+                    container.style.gridTemplateRows = ''; 
+                    container.style.gridAutoFlow = ''; 
+                } 
+ 
+                gapValTag.textContent = `${state.gap}px`; 
+                itemCountTag.textContent = state.itemsCount; 
+ 
+                // 3. Render Items 
+                container.innerHTML = ''; 
+                for (let i = 0; i < state.itemsCount; i++) { 
+                    const itemEl = document.createElement('div'); 
+                    const colorScheme = itemColors[i % itemColors.length]; 
+                    const override = state.itemOverrides[i] || { flexGrow: 0, flexShrink: 1, alignSelf: 'auto', gridColSpan: 'auto' }; 
+ 
+                    itemEl.className = `playground-item p-4 rounded-lg border font-mono text-xs font-semibold flex flex-col justify-between cursor-pointer select-none min-h-[70px] ${colorScheme.bg} ${colorScheme.border} ${colorScheme.text}`; 
+                     
+                    if (state.selectedIndex === i) { 
+                        itemEl.classList.add('selected', 'ring-2', 'ring-cyan-400'); 
+                    } 
+ 
+                    // Apply Individual Item Overrides 
+                    if (state.display === 'flex') { 
+                        itemEl.style.flexGrow = override.flexGrow; 
+                        itemEl.style.flexShrink = override.flexShrink; 
+                        itemEl.style.alignSelf = override.alignSelf; 
+                        itemEl.style.gridColumn = ''; 
+                    } else if (state.display === 'grid') { 
+                        itemEl.style.alignSelf = override.alignSelf; 
+                        itemEl.style.gridColumn = override.gridColSpan; 
+                        itemEl.style.flexGrow = ''; 
+                        itemEl.style.flexShrink = ''; 
+                    } else { 
+                        itemEl.style.marginBottom = `${state.gap}px`; 
+                        itemEl.style.flexGrow = ''; 
+                        itemEl.style.flexShrink = ''; 
+                        itemEl.style.alignSelf = ''; 
+                        itemEl.style.gridColumn = ''; 
+                    } 
+ 
+                    // Content 
+                    itemEl.innerHTML = ` 
+                        <div class="flex items-center justify-between"> 
+                            <span class="w-5 h-5 ${colorScheme.numBg} text-slate-950 font-bold rounded-full flex items-center justify-center text-[10px]"> 
+                                ${i + 1} 
+                            </span> 
+                            <span class="text-[10px] opacity-70">Item ${i + 1}</span> 
+                        </div> 
+                        <div class="mt-2 text-[10px] opacity-80"> 
+                            ${getItemLabel(override)} 
+                        </div> 
+                    `; 
+ 
+                    itemEl.addEventListener('click', () => { 
+                        state.selectedIndex = i; 
+                        updateInspector(); 
+                        render(); 
+                    }); 
+ 
+                    container.appendChild(itemEl); 
+                } 
+ 
+                // 4. Update Banner Insight 
+                insightTitle.textContent = modeInsights[state.display].title; 
+                insightDesc.textContent = modeInsights[state.display].desc; 
+ 
+                // 5. Update Inspector Controls 
+                updateInspector(); 
+ 
+                // 6. Generate CSS Code Snippet 
+                generateCssSnippet(); 
+            } 
+ 
+            function getItemLabel(override) { 
+                if (state.display === 'flex') { 
+                    let parts = []; 
+                    if (override.flexGrow > 0) parts.push(`grow:${override.flexGrow}`); 
+                    if (override.alignSelf !== 'auto') parts.push(`align:${override.alignSelf}`); 
+                    return parts.length ? parts.join(' | ') : 'default flex'; 
+                } else if (state.display === 'grid') { 
+                    if (override.gridColSpan !== 'auto') return `col: ${override.gridColSpan}`; 
+                    return 'grid item'; 
+                } 
+                return 'block item'; 
+            } 
+ 
+            function updateInspector() { 
+                if (state.selectedIndex !== null && state.selectedIndex < state.itemsCount) { 
+                    const idx = state.selectedIndex; 
+                    inspectorTitle.textContent = `Selected: Item ${idx + 1}`; 
+                    const override = state.itemOverrides[idx] || { flexGrow: 0, flexShrink: 1, alignSelf: 'auto', gridColSpan: 'auto' }; 
+ 
+                    inputFlexGrow.value = override.flexGrow; 
+                    inputFlexShrink.value = override.flexShrink; 
+                    selectAlignSelf.value = override.alignSelf; 
+                    selectGridColSpan.value = override.gridColSpan; 
+                } else { 
+                    inspectorTitle.textContent = 'No Item Selected'; 
+                } 
+            } 
+ 
+            function generateCssSnippet() { 
+                let css = `<span class="token-selector">.container</span> {\n`; 
+                css += `  <span class="token-prop">display</span>: <span class="token-val">${state.display}</span>;\n`; 
+ 
+                if (state.display === 'flex') { 
+                    css += `  <span class="token-prop">flex-direction</span>: <span class="token-val">${state.flexDirection}</span>;\n`; 
+                    css += `  <span class="token-prop">flex-wrap</span>: <span class="token-val">${state.flexWrap}</span>;\n`; 
+                    css += `  <span class="token-prop">justify-content</span>: <span class="token-val">${state.justifyContent}</span>;\n`; 
+                    css += `  <span class="token-prop">align-items</span>: <span class="token-val">${state.alignItems}</span>;\n`; 
+                } else if (state.display === 'grid') { 
+                    css += `  <span class="token-prop">grid-template-columns</span>: <span class="token-val">${state.gridColumns}</span>;\n`; 
+                    if (state.gridRows !== 'auto') { 
+                        css += `  <span class="token-prop">grid-template-rows</span>: <span class="token-val">${state.gridRows}</span>;\n`; 
+                    } 
+                    if (state.gridAutoFlow !== 'row') { 
+                        css += `  <span class="token-prop">grid-auto-flow</span>: <span class="token-val">${state.gridAutoFlow}</span>;\n`; 
+                    } 
+                    css += `  <span class="token-prop">justify-content</span>: <span class="token-val">${state.justifyContent}</span>;\n`; 
+                    css += `  <span class="token-prop">align-items</span>: <span class="token-val">${state.alignItems}</span>;\n`; 
+                } 
+ 
+                css += `  <span class="token-prop">gap</span>: <span class="token-val">${state.gap}px</span>;\n`; 
+                css += `}`; 
+ 
+                // Add selected item CSS if overridden 
+                if (state.selectedIndex !== null && state.selectedIndex < state.itemsCount) { 
+                    const idx = state.selectedIndex; 
+                    const o = state.itemOverrides[idx]; 
+                    let itemCss = ''; 
+ 
+                    if (state.display === 'flex') { 
+                        if (o.flexGrow > 0) itemCss += `  <span class="token-prop">flex-grow</span>: <span class="token-val">${o.flexGrow}</span>;\n`; 
+                        if (o.flexShrink !== 1) itemCss += `  <span class="token-prop">flex-shrink</span>: <span class="token-val">${o.flexShrink}</span>;\n`; 
+                        if (o.alignSelf !== 'auto') itemCss += `  <span class="token-prop">align-self</span>: <span class="token-val">${o.alignSelf}</span>;\n`; 
+                    } else if (state.display === 'grid') { 
+                        if (o.gridColSpan !== 'auto') itemCss += `  <span class="token-prop">grid-column</span>: <span class="token-val">${o.gridColSpan}</span>;\n`; 
+                        if (o.alignSelf !== 'auto') itemCss += `  <span class="token-prop">align-self</span>: <span class="token-val">${o.alignSelf}</span>;\n`; 
+                    } 
+ 
+                    if (itemCss) { 
+                        css += `\n\n<span class="token-selector">.item-${idx + 1}</span> {\n${itemCss}}`; 
+                    } 
+                } 
+ 
+                cssOutputCode.innerHTML = css; 
+            } 
+ 
+            // Display Mode Switcher 
+            modeBtns.forEach(btn => { 
+                btn.addEventListener('click', () => { 
+                    modeBtns.forEach(b => { 
+                        b.classList.remove('active-flex', 'active-grid', 'active-block', 'border-cyan-500', 'border-purple-500', 'border-amber-500'); 
+                        b.classList.add('border-slate-800', 'bg-slate-950', 'text-slate-400'); 
+                    }); 
+ 
+                    state.display = btn.getAttribute('data-mode'); 
+ 
+                    if (state.display === 'flex') btn.classList.add('active-flex'); 
+                    if (state.display === 'grid') btn.classList.add('active-grid'); 
+                    if (state.display === 'block') btn.classList.add('active-block'); 
+ 
+                    render(); 
+                }); 
+            }); 
+ 
+            // Select Dropdown listeners 
+            selectFlexDirection.addEventListener('change', (e) => { state.flexDirection = e.target.value; render(); }); 
+            selectFlexWrap.addEventListener('change', (e) => { state.flexWrap = e.target.value; render(); }); 
+            selectJustifyContent.addEventListener('change', (e) => { state.justifyContent = e.target.value; render(); }); 
+            selectAlignItems.addEventListener('change', (e) => { state.alignItems = e.target.value; render(); }); 
+            selectGridColumns.addEventListener('change', (e) => { state.gridColumns = e.target.value; render(); }); 
+            selectGridRows.addEventListener('change', (e) => { state.gridRows = e.target.value; render(); }); 
+            selectGridAutoFlow.addEventListener('change', (e) => { state.gridAutoFlow = e.target.value; render(); }); 
+            rangeGap.addEventListener('input', (e) => { state.gap = parseInt(e.target.value, 10); render(); }); 
+ 
+            // Add/Remove Item Buttons 
+            addItemBtn.addEventListener('click', () => { 
+                if (state.itemsCount < 12) { 
+                    state.itemsCount++; 
+                    state.itemOverrides.push({ flexGrow: 0, flexShrink: 1, alignSelf: 'auto', gridColSpan: 'auto' }); 
+                    render(); 
+                } 
+            }); 
+ 
+            removeItemBtn.addEventListener('click', () => { 
+                if (state.itemsCount > 1) { 
+                    state.itemsCount--; 
+                    if (state.selectedIndex >= state.itemsCount) { 
+                        state.selectedIndex = state.itemsCount - 1; 
+                    } 
+                    render(); 
+                } 
+            }); 
+ 
+            // Item Inspector Listener Inputs 
+            inputFlexGrow.addEventListener('input', (e) => { 
+                if (state.selectedIndex !== null) { 
+                    state.itemOverrides[state.selectedIndex].flexGrow = parseInt(e.target.value, 10) || 0; 
+                    render(); 
+                } 
+            }); 
+ 
+            inputFlexShrink.addEventListener('input', (e) => { 
+                if (state.selectedIndex !== null) { 
+                    state.itemOverrides[state.selectedIndex].flexShrink = parseInt(e.target.value, 10) || 0; 
+                    render(); 
+                } 
+            }); 
+ 
+            selectAlignSelf.addEventListener('change', (e) => { 
+                if (state.selectedIndex !== null) { 
+                    state.itemOverrides[state.selectedIndex].alignSelf = e.target.value; 
+                    render(); 
+                } 
+            }); 
+ 
+            selectGridColSpan.addEventListener('change', (e) => { 
+                if (state.selectedIndex !== null) { 
+                    state.itemOverrides[state.selectedIndex].gridColSpan = e.target.value; 
+                    render(); 
+                } 
+            }); 
+ 
+            clearSelectionBtn.addEventListener('click', () => { 
+                state.selectedIndex = null; 
+                render(); 
+            }); 
+ 
+            // Copy CSS 
+            copyCssBtn.addEventListener('click', () => { 
+                const text = cssOutputCode.innerText; 
+                const tempTextarea = document.createElement('textarea'); 
+                tempTextarea.value = text; 
+                document.body.appendChild(tempTextarea); 
+                tempTextarea.select(); 
+                document.execCommand('copy'); 
+                document.body.removeChild(tempTextarea); 
+ 
+                const originalBtnText = copyCssBtn.innerHTML; 
+                copyCssBtn.innerHTML = `<i class="fa-solid fa-check text-emerald-400"></i> Copied!`; 
+                setTimeout(() => { 
+                    copyCssBtn.innerHTML = originalBtnText; 
+                }, 1800); 
+            }); 
+ 
+            // Reset Playground Button 
+            resetAllBtn.addEventListener('click', () => { 
+                state.display = 'flex'; 
+                state.flexDirection = 'row'; 
+                state.flexWrap = 'nowrap'; 
+                state.justifyContent = 'flex-start'; 
+                state.alignItems = 'stretch'; 
+                state.gridColumns = 'repeat(3, 1fr)'; 
+                state.gridRows = 'auto'; 
+                state.gridAutoFlow = 'row'; 
+                state.gap = 16; 
+                state.itemsCount = 5; 
+                state.selectedIndex = 0; 
+                state.itemOverrides = Array.from({ length: 12 }, () => ({ flexGrow: 0, flexShrink: 1, alignSelf: 'auto', gridColSpan: 'auto' })); 
+ 
+                selectFlexDirection.value = 'row'; 
+                selectFlexWrap.value = 'nowrap'; 
+                selectJustifyContent.value = 'flex-start'; 
+                selectAlignItems.value = 'stretch'; 
+                selectGridColumns.value = 'repeat(3, 1fr)'; 
+                selectGridRows.value = 'auto'; 
+                selectGridAutoFlow.value = 'row'; 
+                rangeGap.value = 16; 
+ 
+                modeBtns.forEach(b => { 
+                    b.classList.remove('active-flex', 'active-grid', 'active-block'); 
+                    if (b.getAttribute('data-mode') === 'flex') b.classList.add('active-flex'); 
+                }); 
+ 
+                render(); 
+            }); 
+ 
+            // Initial Run 
+            render(); 
+        }); 
+    </script> 
+</body> 
+</html> 

@@ -1,0 +1,1059 @@
+<!DOCTYPE html>
+<html lang="en" class="dark">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>CSS Box Model & Display Explorer</title>
+
+    <!-- Tailwind CSS CDN -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <!-- FontAwesome Icons CDN -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+
+    <script>
+        tailwind.config = {
+            darkMode: 'class',
+            theme: {
+                extend: {
+                    colors: {
+                        boxContent: '#3b82f6',  /* Blue */
+                        boxPadding: '#10b981',  /* Emerald */
+                        boxBorder: '#f59e0b',   /* Amber */
+                        boxMargin: '#ef4444',   /* Red */
+                    }
+                }
+            }
+        }
+    </script>
+
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=Fira+Code:wght@400;500&display=swap');
+
+        body {
+            font-family: 'Inter', sans-serif;
+        }
+
+        code, pre {
+            font-family: 'Fira Code', monospace;
+        }
+
+        /* Custom range input styling */
+        input[type=range] {
+            -webkit-appearance: none;
+            background: transparent;
+        }
+        input[type=range]::-webkit-slider-thumb {
+            -webkit-appearance: none;
+            height: 14px;
+            width: 14px;
+            border-radius: 50%;
+            background: #3b82f6;
+            cursor: pointer;
+            margin-top: -4px;
+            box-shadow: 0 0 8px rgba(59, 130, 246, 0.6);
+            transition: all 0.15s ease;
+        }
+        input[type=range]::-webkit-slider-thumb:hover {
+            transform: scale(1.25);
+            background: #60a5fa;
+        }
+        input[type=range]::-webkit-slider-runnable-track {
+            width: 100%;
+            height: 6px;
+            cursor: pointer;
+            background: #1e293b;
+            border-radius: 3px;
+            border: 1px solid #334155;
+        }
+
+        /* Accent-specific range sliders */
+        input[type=range].slider-margin::-webkit-slider-thumb { background: #f43f5e; box-shadow: 0 0 8px rgba(244, 63, 94, 0.6); }
+        input[type=range].slider-padding::-webkit-slider-thumb { background: #10b981; box-shadow: 0 0 8px rgba(16, 185, 129, 0.6); }
+        input[type=range].slider-border::-webkit-slider-thumb { background: #f59e0b; box-shadow: 0 0 8px rgba(245, 158, 11, 0.6); }
+        input[type=range].slider-radius::-webkit-slider-thumb { background: #a855f7; box-shadow: 0 0 8px rgba(168, 85, 247, 0.6); }
+
+        /* Syntax Token colors */
+        .token-selector { color: #fde047; }
+        .token-prop { color: #93c5fd; }
+        .token-val { color: #fca5a5; }
+        .token-comment { color: #6b7280; font-style: italic; }
+
+        /* Box 1 Visual Overlay Wrapper */
+        .box1-margin-wrapper {
+            background-color: rgba(244, 63, 94, 0.15);
+            border: 1px dashed rgba(244, 63, 94, 0.6);
+            transition: all 0.15s ease-out;
+        }
+
+        /* Box 1 Target element */
+        #box1 {
+            transition: all 0.15s ease-out;
+            background-color: rgba(16, 185, 129, 0.25); /* Padding visualizer */
+        }
+
+        .box1-content-inner {
+            background-color: rgba(59, 130, 246, 0.85);
+            transition: all 0.15s ease-out;
+        }
+
+        /* Tab active state transitions */
+        .control-tab.active {
+            border-color: #3b82f6;
+            color: #60a5fa;
+            background-color: rgba(59, 130, 246, 0.1);
+        }
+    </style>
+</head>
+<body class="bg-slate-950 text-slate-100 min-h-screen flex flex-col antialiased selection:bg-blue-500/30">
+
+    <!-- Navigation Header -->
+    <header class="border-b border-slate-800 bg-slate-900/90 backdrop-blur sticky top-0 z-50">
+        <div class="max-w-7xl mx-auto px-4 py-3 sm:px-6 lg:px-8 flex items-center justify-between">
+            <div class="flex items-center space-x-3">
+                <div class="p-2 bg-gradient-to-tr from-blue-500/20 to-emerald-500/20 text-blue-400 rounded-lg border border-blue-500/30">
+                    <i class="fa-solid fa-cubes text-xl"></i>
+                </div>
+                <div>
+                    <h1 class="font-bold text-lg text-white leading-tight">CSS Box Model & Display Explorer</h1>
+                    <p class="text-xs text-slate-400">Interactive Per-Side Layout Engine & Visualizer</p>
+                </div>
+            </div>
+            
+            <!-- Quick Preset Buttons -->
+            <div class="hidden md:flex items-center space-x-2">
+                <span class="text-xs text-slate-400 font-medium mr-1">Presets:</span>
+                <button id="presetCard" class="text-xs bg-slate-800 hover:bg-slate-700 text-slate-200 px-2.5 py-1.5 rounded-md border border-slate-700 transition">
+                    Card
+                </button>
+                <button id="presetAsymmetric" class="text-xs bg-slate-800 hover:bg-slate-700 text-slate-200 px-2.5 py-1.5 rounded-md border border-slate-700 transition">
+                    Asymmetric
+                </button>
+                <button id="presetInline" class="text-xs bg-slate-800 hover:bg-slate-700 text-slate-200 px-2.5 py-1.5 rounded-md border border-slate-700 transition">
+                    Inline Badge
+                </button>
+                <button id="resetBtn" class="text-xs bg-rose-950/60 hover:bg-rose-900/80 text-rose-300 px-2.5 py-1.5 rounded-md border border-rose-800/50 transition flex items-center gap-1 ml-2">
+                    <i class="fa-solid fa-rotate-left"></i> Reset
+                </button>
+            </div>
+        </div>
+    </header>
+
+    <main class="flex-1 max-w-7xl w-full mx-auto p-4 sm:p-6 lg:p-8 grid grid-cols-1 lg:grid-cols-12 gap-6">
+
+        <!-- LEFT COLUMN: Control Panel -->
+        <section class="lg:col-span-6 flex flex-col gap-5">
+            
+            <!-- Core Controls Box -->
+            <div class="bg-slate-900 border border-slate-800 rounded-xl p-5 shadow-xl space-y-4">
+                
+                <!-- Display Mode & Box Sizing Dropdowns -->
+                <div class="grid grid-cols-2 gap-3 pb-3 border-b border-slate-800">
+                    <div class="space-y-1.5">
+                        <label for="selectDisplay" class="text-xs font-medium text-slate-300 flex justify-between">
+                            <span>Display Property</span>
+                            <span id="activeDisplayBadge" class="text-[10px] font-mono text-blue-400 font-bold">block</span>
+                        </label>
+                        <select id="selectDisplay" class="w-full bg-slate-950 border border-slate-800 text-slate-200 text-xs rounded-lg p-2 focus:border-blue-500 focus:ring-1 focus:ring-blue-500 outline-none transition">
+                            <option value="block" selected>block</option>
+                            <option value="inline-block">inline-block</option>
+                            <option value="inline">inline</option>
+                        </select>
+                    </div>
+
+                    <div class="space-y-1.5">
+                        <label for="selectBoxSizing" class="text-xs font-medium text-slate-300 flex justify-between">
+                            <span>Box Sizing</span>
+                            <span id="activeSizingBadge" class="text-[10px] font-mono text-emerald-400 font-bold">content-box</span>
+                        </label>
+                        <select id="selectBoxSizing" class="w-full bg-slate-950 border border-slate-800 text-slate-200 text-xs rounded-lg p-2 focus:border-blue-500 focus:ring-1 focus:ring-blue-500 outline-none transition">
+                            <option value="content-box" selected>content-box (default)</option>
+                            <option value="border-box">border-box</option>
+                        </select>
+                    </div>
+                </div>
+
+                <!-- Width & Height Dimension Sliders -->
+                <div class="grid grid-cols-1 sm:grid-cols-2 gap-4 pb-3 border-b border-slate-800">
+                    <!-- Width Slider -->
+                    <div class="space-y-1.5">
+                        <div class="flex justify-between text-xs">
+                            <label for="rangeWidth" class="font-medium text-blue-400 flex items-center gap-1.5">
+                                <span class="w-2 h-2 rounded-full bg-blue-500 inline-block"></span> Width
+                            </label>
+                            <div class="flex items-center gap-2">
+                                <label class="text-[10px] text-slate-400 flex items-center gap-1 cursor-pointer">
+                                    <input type="checkbox" id="checkAutoWidth" class="rounded bg-slate-950 border-slate-700 text-blue-500 focus:ring-0"> auto
+                                </label>
+                                <span id="valWidth" class="font-mono text-blue-400 font-semibold">180px</span>
+                            </div>
+                        </div>
+                        <input id="rangeWidth" type="range" min="40" max="400" value="180" class="w-full">
+                    </div>
+
+                    <!-- Height Slider -->
+                    <div class="space-y-1.5">
+                        <div class="flex justify-between text-xs">
+                            <label for="rangeHeight" class="font-medium text-blue-400 flex items-center gap-1.5">
+                                <span class="w-2 h-2 rounded-full bg-blue-500 inline-block"></span> Height
+                            </label>
+                            <div class="flex items-center gap-2">
+                                <label class="text-[10px] text-slate-400 flex items-center gap-1 cursor-pointer">
+                                    <input type="checkbox" id="checkAutoHeight" class="rounded bg-slate-950 border-slate-700 text-blue-500 focus:ring-0"> auto
+                                </label>
+                                <span id="valHeight" class="font-mono text-blue-400 font-semibold">80px</span>
+                            </div>
+                        </div>
+                        <input id="rangeHeight" type="range" min="30" max="250" value="80" class="w-full">
+                    </div>
+                </div>
+
+                <!-- Tab Controls for Margin, Padding, Border, Corner Radius -->
+                <div class="space-y-3">
+                    <div class="flex border-b border-slate-800 text-xs font-medium gap-1">
+                        <button id="tabBtnMargin" class="control-tab active py-2 px-3 border-b-2 border-transparent rounded-t-lg transition flex items-center gap-1.5 text-slate-400">
+                            <span class="w-2 h-2 rounded-full bg-rose-500 inline-block"></span> Margin
+                        </button>
+                        <button id="tabBtnPadding" class="control-tab py-2 px-3 border-b-2 border-transparent rounded-t-lg transition flex items-center gap-1.5 text-slate-400">
+                            <span class="w-2 h-2 rounded-full bg-emerald-500 inline-block"></span> Padding
+                        </button>
+                        <button id="tabBtnBorder" class="control-tab py-2 px-3 border-b-2 border-transparent rounded-t-lg transition flex items-center gap-1.5 text-slate-400">
+                            <span class="w-2 h-2 rounded-full bg-amber-500 inline-block"></span> Border
+                        </button>
+                        <button id="tabBtnRadius" class="control-tab py-2 px-3 border-b-2 border-transparent rounded-t-lg transition flex items-center gap-1.5 text-slate-400">
+                            <span class="w-2 h-2 rounded-full bg-purple-500 inline-block"></span> Corner Radius
+                        </button>
+                    </div>
+
+                    <!-- TAB 1: MARGIN (Top, Right, Bottom, Left) -->
+                    <div id="tabContentMargin" class="space-y-3 pt-1">
+                        <div class="flex justify-between items-center text-xs text-slate-400 mb-1">
+                            <span class="font-semibold text-rose-400">Margin Per Side Controls</span>
+                            <button id="lockMarginBtn" class="text-[11px] bg-slate-950 px-2 py-1 rounded border border-slate-800 hover:border-slate-700 text-slate-300 flex items-center gap-1">
+                                <i class="fa-solid fa-lock text-rose-400" id="lockMarginIcon"></i> <span id="lockMarginText">Sides Unlinked</span>
+                            </button>
+                        </div>
+                        <div class="grid grid-cols-2 gap-3">
+                            <div class="space-y-1">
+                                <div class="flex justify-between text-[11px] text-slate-300">
+                                    <span>Top</span>
+                                    <span id="valMarginTop" class="font-mono text-rose-400">16px</span>
+                                </div>
+                                <input id="rangeMarginTop" type="range" min="0" max="100" value="16" class="w-full slider-margin">
+                            </div>
+                            <div class="space-y-1">
+                                <div class="flex justify-between text-[11px] text-slate-300">
+                                    <span>Right</span>
+                                    <span id="valMarginRight" class="font-mono text-rose-400">16px</span>
+                                </div>
+                                <input id="rangeMarginRight" type="range" min="0" max="100" value="16" class="w-full slider-margin">
+                            </div>
+                            <div class="space-y-1">
+                                <div class="flex justify-between text-[11px] text-slate-300">
+                                    <span>Bottom</span>
+                                    <span id="valMarginBottom" class="font-mono text-rose-400">16px</span>
+                                </div>
+                                <input id="rangeMarginBottom" type="range" min="0" max="100" value="16" class="w-full slider-margin">
+                            </div>
+                            <div class="space-y-1">
+                                <div class="flex justify-between text-[11px] text-slate-300">
+                                    <span>Left</span>
+                                    <span id="valMarginLeft" class="font-mono text-rose-400">16px</span>
+                                </div>
+                                <input id="rangeMarginLeft" type="range" min="0" max="100" value="16" class="w-full slider-margin">
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- TAB 2: PADDING (Top, Right, Bottom, Left) -->
+                    <div id="tabContentPadding" class="space-y-3 pt-1 hidden">
+                        <div class="flex justify-between items-center text-xs text-slate-400 mb-1">
+                            <span class="font-semibold text-emerald-400">Padding Per Side Controls</span>
+                            <button id="lockPaddingBtn" class="text-[11px] bg-slate-950 px-2 py-1 rounded border border-slate-800 hover:border-slate-700 text-slate-300 flex items-center gap-1">
+                                <i class="fa-solid fa-lock text-emerald-400" id="lockPaddingIcon"></i> <span id="lockPaddingText">Sides Unlinked</span>
+                            </button>
+                        </div>
+                        <div class="grid grid-cols-2 gap-3">
+                            <div class="space-y-1">
+                                <div class="flex justify-between text-[11px] text-slate-300">
+                                    <span>Top</span>
+                                    <span id="valPaddingTop" class="font-mono text-emerald-400">20px</span>
+                                </div>
+                                <input id="rangePaddingTop" type="range" min="0" max="100" value="20" class="w-full slider-padding">
+                            </div>
+                            <div class="space-y-1">
+                                <div class="flex justify-between text-[11px] text-slate-300">
+                                    <span>Right</span>
+                                    <span id="valPaddingRight" class="font-mono text-emerald-400">20px</span>
+                                </div>
+                                <input id="rangePaddingRight" type="range" min="0" max="100" value="20" class="w-full slider-padding">
+                            </div>
+                            <div class="space-y-1">
+                                <div class="flex justify-between text-[11px] text-slate-300">
+                                    <span>Bottom</span>
+                                    <span id="valPaddingBottom" class="font-mono text-emerald-400">20px</span>
+                                </div>
+                                <input id="rangePaddingBottom" type="range" min="0" max="100" value="20" class="w-full slider-padding">
+                            </div>
+                            <div class="space-y-1">
+                                <div class="flex justify-between text-[11px] text-slate-300">
+                                    <span>Left</span>
+                                    <span id="valPaddingLeft" class="font-mono text-emerald-400">20px</span>
+                                </div>
+                                <input id="rangePaddingLeft" type="range" min="0" max="100" value="20" class="w-full slider-padding">
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- TAB 3: BORDER WIDTH (Top, Right, Bottom, Left) -->
+                    <div id="tabContentBorder" class="space-y-3 pt-1 hidden">
+                        <div class="flex justify-between items-center text-xs text-slate-400 mb-1">
+                            <span class="font-semibold text-amber-400">Border Width Per Side Controls</span>
+                            <button id="lockBorderBtn" class="text-[11px] bg-slate-950 px-2 py-1 rounded border border-slate-800 hover:border-slate-700 text-slate-300 flex items-center gap-1">
+                                <i class="fa-solid fa-lock text-amber-400" id="lockBorderIcon"></i> <span id="lockBorderText">Sides Unlinked</span>
+                            </button>
+                        </div>
+                        <div class="grid grid-cols-2 gap-3">
+                            <div class="space-y-1">
+                                <div class="flex justify-between text-[11px] text-slate-300">
+                                    <span>Top Width</span>
+                                    <span id="valBorderTop" class="font-mono text-amber-400">4px</span>
+                                </div>
+                                <input id="rangeBorderTop" type="range" min="0" max="40" value="4" class="w-full slider-border">
+                            </div>
+                            <div class="space-y-1">
+                                <div class="flex justify-between text-[11px] text-slate-300">
+                                    <span>Right Width</span>
+                                    <span id="valBorderRight" class="font-mono text-amber-400">4px</span>
+                                </div>
+                                <input id="rangeBorderRight" type="range" min="0" max="40" value="4" class="w-full slider-border">
+                            </div>
+                            <div class="space-y-1">
+                                <div class="flex justify-between text-[11px] text-slate-300">
+                                    <span>Bottom Width</span>
+                                    <span id="valBorderBottom" class="font-mono text-amber-400">4px</span>
+                                </div>
+                                <input id="rangeBorderBottom" type="range" min="0" max="40" value="4" class="w-full slider-border">
+                            </div>
+                            <div class="space-y-1">
+                                <div class="flex justify-between text-[11px] text-slate-300">
+                                    <span>Left Width</span>
+                                    <span id="valBorderLeft" class="font-mono text-amber-400">4px</span>
+                                </div>
+                                <input id="rangeBorderLeft" type="range" min="0" max="40" value="4" class="w-full slider-border">
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- TAB 4: CORNER / BORDER RADIUS -->
+                    <div id="tabContentRadius" class="space-y-3 pt-1 hidden">
+                        <div class="flex justify-between items-center text-xs text-slate-400 mb-1">
+                            <span class="font-semibold text-purple-400">Corner Radius Control</span>
+                            <div class="flex items-center gap-2">
+                                <label class="text-[11px] text-slate-400 flex items-center gap-1 cursor-pointer">
+                                    <input type="checkbox" id="checkRadiusPercent" class="rounded bg-slate-950 border-slate-700 text-purple-500 focus:ring-0"> 50% Pill Mode
+                                </label>
+                            </div>
+                        </div>
+                        <div class="space-y-2">
+                            <div class="flex justify-between text-xs">
+                                <label for="rangeRadius" class="font-medium text-purple-400 flex items-center gap-1.5">
+                                    <i class="fa-regular fa-circle text-[10px]"></i> Corner Radius
+                                </label>
+                                <span id="valRadius" class="font-mono text-purple-400 font-semibold">8px</span>
+                            </div>
+                            <input id="rangeRadius" type="range" min="0" max="100" value="8" class="w-full slider-radius">
+                        </div>
+                    </div>
+
+                </div>
+
+            </div>
+
+            <!-- Concentric Box Diagram Visualizer -->
+            <div class="bg-slate-900 border border-slate-800 rounded-xl p-4 shadow-xl space-y-3">
+                <h3 class="text-xs font-semibold uppercase tracking-wider text-slate-400 flex items-center gap-2">
+                    <i class="fa-solid fa-chart-pie text-blue-400"></i> Concentric Box Model Diagram
+                </h3>
+
+                <!-- Concentric Interactive Graphic -->
+                <div class="bg-slate-950 p-4 rounded-xl border border-slate-800 flex items-center justify-center font-mono text-[11px]">
+                    <div class="w-full max-w-sm bg-rose-950/40 border border-rose-500/40 rounded-lg p-3 text-rose-300 relative text-center">
+                        <span class="text-[9px] uppercase tracking-wider font-bold block mb-1">Margin</span>
+                        <div class="flex justify-between items-center px-2 text-[10px] text-rose-400">
+                            <span id="diagMarginLeft">16</span>
+                            <div class="w-full my-1 bg-amber-950/50 border border-amber-500/40 rounded p-3 text-amber-300 relative">
+                                <span class="text-[9px] uppercase tracking-wider font-bold block mb-1">Border</span>
+                                <div class="flex justify-between items-center px-2 text-[10px] text-amber-400">
+                                    <span id="diagBorderLeft">4</span>
+                                    <div class="w-full my-1 bg-emerald-950/50 border border-emerald-500/40 rounded p-3 text-emerald-300 relative">
+                                        <span class="text-[9px] uppercase tracking-wider font-bold block mb-1">Padding</span>
+                                        <div class="flex justify-between items-center px-2 text-[10px] text-emerald-400">
+                                            <span id="diagPaddingLeft">20</span>
+                                            <div class="w-full my-1 bg-blue-600 border border-blue-400 rounded p-2 text-white font-bold text-center">
+                                                <span id="diagContentDim">180 × 80</span>
+                                            </div>
+                                            <span id="diagPaddingRight">20</span>
+                                        </div>
+                                        <span id="diagPaddingBottom" class="block text-[10px] text-emerald-400 mt-1">20</span>
+                                    </div>
+                                    <span id="diagBorderRight">4</span>
+                                </div>
+                                <span id="diagBorderBottom" class="block text-[10px] text-amber-400 mt-1">4</span>
+                            </div>
+                            <span id="diagMarginRight">16</span>
+                        </div>
+                        <span id="diagMarginBottom" class="block text-[10px] text-rose-400 mt-1">16</span>
+                    </div>
+                </div>
+            </div>
+
+        </section>
+
+        <!-- RIGHT COLUMN: Visual Stage & Generated Output -->
+        <section class="lg:col-span-6 flex flex-col gap-5">
+
+            <!-- Contextual Educational Tip Banner -->
+            <div id="insightBanner" class="bg-blue-950/40 border border-blue-500/40 rounded-xl p-4 flex gap-3 items-start transition-all">
+                <i class="fa-solid fa-lightbulb text-blue-400 text-lg mt-0.5 shrink-0"></i>
+                <div>
+                    <h3 id="insightTitle" class="text-sm font-semibold text-blue-200">Block Layout Behavior</h3>
+                    <p id="insightDesc" class="text-xs text-slate-300 mt-0.5 leading-relaxed">
+                        Block elements force line breaks and respect explicit widths, heights, padding, and margins on all sides.
+                    </p>
+                </div>
+            </div>
+
+            <!-- Visual Color Legend Bar -->
+            <div class="bg-slate-900 border border-slate-800 rounded-xl p-3 shadow-xl flex flex-wrap gap-4 text-xs font-mono justify-around items-center">
+                <span class="flex items-center gap-1.5">
+                    <span class="w-3 h-3 rounded bg-blue-500 inline-block"></span>
+                    <span class="text-slate-300">Content Area</span>
+                </span>
+                <span class="flex items-center gap-1.5">
+                    <span class="w-3 h-3 rounded bg-emerald-500 inline-block"></span>
+                    <span class="text-slate-300">Padding Area</span>
+                </span>
+                <span class="flex items-center gap-1.5">
+                    <span class="w-3 h-3 rounded bg-amber-500 inline-block"></span>
+                    <span class="text-slate-300">Border Area</span>
+                </span>
+                <span class="flex items-center gap-1.5">
+                    <span class="w-3 h-3 rounded bg-rose-500/50 border border-rose-500 border-dashed inline-block"></span>
+                    <span class="text-slate-300">Margin Area</span>
+                </span>
+            </div>
+
+            <!-- Document Flow Playground Canvas -->
+            <div class="bg-slate-900 border border-slate-800 rounded-xl p-5 shadow-xl flex flex-col min-h-[360px]">
+                
+                <div class="flex justify-between items-center mb-3 text-xs text-slate-400 border-b border-slate-800 pb-2">
+                    <span class="flex items-center gap-2 font-mono">
+                        <i class="fa-solid fa-laptop-code text-blue-400"></i> Layout Flow Sandbox
+                    </span>
+                    <span class="font-mono text-[11px] text-slate-500">parent width: 100%</span>
+                </div>
+
+                <!-- Interactive Sandbox Canvas -->
+                <div class="flex-1 bg-slate-950 rounded-xl border-2 border-dashed border-slate-800 p-5 overflow-auto min-h-[260px] leading-relaxed text-slate-400 text-sm">
+                    
+                    <span>Sample prefix document text flow. </span>
+
+                    <!-- Outer Margin Overlay Wrapper for Box 1 -->
+                    <div id="box1MarginWrapper" class="box1-margin-wrapper inline-block rounded-lg p-0 align-top">
+                        
+                        <!-- Box 1 Element (Primary Control Target) -->
+                        <div id="box1" class="border-amber-500 text-white font-semibold font-mono text-xs shadow-lg relative">
+                            <!-- Inner Content Area -->
+                            <div id="box1Content" class="box1-content-inner h-full w-full flex items-center justify-center p-2 text-center select-none rounded">
+                                <span>Box 1</span>
+                            </div>
+                        </div>
+
+                    </div>
+
+                    <!-- Box 2 Reference Element -->
+                    <div id="box2" class="bg-slate-800 border-2 border-slate-600 text-slate-200 font-mono text-xs font-semibold p-4 rounded-lg inline-block align-top shadow-md my-2">
+                        Box 2 (Neighbor)
+                    </div>
+
+                    <span> Suffix document text flow demonstrating inline text wrapping around elements.</span>
+
+                </div>
+
+            </div>
+
+            <!-- Dynamic Calculation Card -->
+            <div class="bg-slate-900 border border-slate-800 rounded-xl p-4 shadow-xl space-y-3">
+                <h3 class="text-xs font-semibold uppercase tracking-wider text-slate-400 flex items-center gap-2">
+                    <i class="fa-solid fa-calculator text-blue-400"></i> Calculated Geometry Metrics
+                </h3>
+
+                <div class="grid grid-cols-2 gap-2 text-xs font-mono">
+                    <div class="bg-slate-950 p-2.5 rounded-lg border border-slate-800">
+                        <span class="text-slate-500 block text-[10px] uppercase">Outer Element Size</span>
+                        <span id="calcOuterSize" class="text-white font-bold text-sm">228px × 128px</span>
+                        <span id="calcOuterFormula" class="text-[10px] text-slate-400 block mt-0.5">Content + Pad + Border</span>
+                    </div>
+
+                    <div class="bg-slate-950 p-2.5 rounded-lg border border-slate-800">
+                        <span class="text-slate-500 block text-[10px] uppercase">Total Footprint (w/ Margins)</span>
+                        <span id="calcTotalFootprint" class="text-rose-400 font-bold text-sm">260px × 160px</span>
+                        <span id="calcFootprintFormula" class="text-[10px] text-slate-400 block mt-0.5">Outer Size + Margins</span>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Generated CSS Code Block -->
+            <div class="bg-slate-900 border border-slate-800 rounded-xl p-4 shadow-xl space-y-2">
+                <div class="flex justify-between items-center">
+                    <span class="text-xs font-semibold uppercase tracking-wider text-slate-400 flex items-center gap-1.5">
+                        <i class="fa-solid fa-code text-blue-400"></i> Active CSS Rule for #box1
+                    </span>
+                    <button id="copyCssBtn" class="text-xs text-slate-400 hover:text-white flex items-center gap-1.5 bg-slate-800 hover:bg-slate-700 px-2.5 py-1 rounded-md border border-slate-700 transition">
+                        <i class="fa-regular fa-copy"></i> Copy CSS
+                    </button>
+                </div>
+                <pre class="bg-slate-950 p-3.5 rounded-lg text-xs font-mono text-slate-300 border border-slate-800 overflow-x-auto"><code id="cssOutputCode">#box1 { ... }</code></pre>
+            </div>
+
+        </section>
+
+    </main>
+
+    <script>
+        document.addEventListener('DOMContentLoaded', () => {
+
+            // State Object
+            const state = {
+                display: 'block',
+                boxSizing: 'content-box',
+                autoWidth: false,
+                autoHeight: false,
+                width: 180,
+                height: 80,
+                
+                // Per side margins
+                margin: { top: 16, right: 16, bottom: 16, left: 16 },
+                marginLocked: false,
+
+                // Per side paddings
+                padding: { top: 20, right: 20, bottom: 20, left: 20 },
+                paddingLocked: false,
+
+                // Per side border widths
+                border: { top: 4, right: 4, bottom: 4, left: 4 },
+                borderLocked: false,
+
+                // Border radius
+                radius: 8,
+                radiusPercent: false
+            };
+
+            // DOM Selectors
+            const selectDisplay = document.getElementById('selectDisplay');
+            const selectBoxSizing = document.getElementById('selectBoxSizing');
+            const activeDisplayBadge = document.getElementById('activeDisplayBadge');
+            const activeSizingBadge = document.getElementById('activeSizingBadge');
+
+            const rangeWidth = document.getElementById('rangeWidth');
+            const rangeHeight = document.getElementById('rangeHeight');
+            const valWidth = document.getElementById('valWidth');
+            const valHeight = document.getElementById('valHeight');
+            const checkAutoWidth = document.getElementById('checkAutoWidth');
+            const checkAutoHeight = document.getElementById('checkAutoHeight');
+
+            // Margin Controls
+            const rangeMarginTop = document.getElementById('rangeMarginTop');
+            const rangeMarginRight = document.getElementById('rangeMarginRight');
+            const rangeMarginBottom = document.getElementById('rangeMarginBottom');
+            const rangeMarginLeft = document.getElementById('rangeMarginLeft');
+            const valMarginTop = document.getElementById('valMarginTop');
+            const valMarginRight = document.getElementById('valMarginRight');
+            const valMarginBottom = document.getElementById('valMarginBottom');
+            const valMarginLeft = document.getElementById('valMarginLeft');
+            const lockMarginBtn = document.getElementById('lockMarginBtn');
+            const lockMarginIcon = document.getElementById('lockMarginIcon');
+            const lockMarginText = document.getElementById('lockMarginText');
+
+            // Padding Controls
+            const rangePaddingTop = document.getElementById('rangePaddingTop');
+            const rangePaddingRight = document.getElementById('rangePaddingRight');
+            const rangePaddingBottom = document.getElementById('rangePaddingBottom');
+            const rangePaddingLeft = document.getElementById('rangePaddingLeft');
+            const valPaddingTop = document.getElementById('valPaddingTop');
+            const valPaddingRight = document.getElementById('valPaddingRight');
+            const valPaddingBottom = document.getElementById('valPaddingBottom');
+            const valPaddingLeft = document.getElementById('valPaddingLeft');
+            const lockPaddingBtn = document.getElementById('lockPaddingBtn');
+            const lockPaddingIcon = document.getElementById('lockPaddingIcon');
+            const lockPaddingText = document.getElementById('lockPaddingText');
+
+            // Border Controls
+            const rangeBorderTop = document.getElementById('rangeBorderTop');
+            const rangeBorderRight = document.getElementById('rangeBorderRight');
+            const rangeBorderBottom = document.getElementById('rangeBorderBottom');
+            const rangeBorderLeft = document.getElementById('rangeBorderLeft');
+            const valBorderTop = document.getElementById('valBorderTop');
+            const valBorderRight = document.getElementById('valBorderRight');
+            const valBorderBottom = document.getElementById('valBorderBottom');
+            const valBorderLeft = document.getElementById('valBorderLeft');
+            const lockBorderBtn = document.getElementById('lockBorderBtn');
+            const lockBorderIcon = document.getElementById('lockBorderIcon');
+            const lockBorderText = document.getElementById('lockBorderText');
+
+            // Radius Controls
+            const rangeRadius = document.getElementById('rangeRadius');
+            const valRadius = document.getElementById('valRadius');
+            const checkRadiusPercent = document.getElementById('checkRadiusPercent');
+
+            // Concentric Diagram DOM Elements
+            const diagMarginLeft = document.getElementById('diagMarginLeft');
+            const diagMarginRight = document.getElementById('diagMarginRight');
+            const diagMarginBottom = document.getElementById('diagMarginBottom');
+            const diagBorderLeft = document.getElementById('diagBorderLeft');
+            const diagBorderRight = document.getElementById('diagBorderRight');
+            const diagBorderBottom = document.getElementById('diagBorderBottom');
+            const diagPaddingLeft = document.getElementById('diagPaddingLeft');
+            const diagPaddingRight = document.getElementById('diagPaddingRight');
+            const diagPaddingBottom = document.getElementById('diagPaddingBottom');
+            const diagContentDim = document.getElementById('diagContentDim');
+
+            // Targets
+            const box1 = document.getElementById('box1');
+            const box1Content = document.getElementById('box1Content');
+            const box1MarginWrapper = document.getElementById('box1MarginWrapper');
+            const box2 = document.getElementById('box2');
+
+            // Metrics & Output
+            const calcOuterSize = document.getElementById('calcOuterSize');
+            const calcTotalFootprint = document.getElementById('calcTotalFootprint');
+            const cssOutputCode = document.getElementById('cssOutputCode');
+            const copyCssBtn = document.getElementById('copyCssBtn');
+            const resetBtn = document.getElementById('resetBtn');
+
+            // Presets
+            const presetCard = document.getElementById('presetCard');
+            const presetAsymmetric = document.getElementById('presetAsymmetric');
+            const presetInline = document.getElementById('presetInline');
+
+            // Tabs
+            const tabs = [
+                { btn: document.getElementById('tabBtnMargin'), content: document.getElementById('tabContentMargin') },
+                { btn: document.getElementById('tabBtnPadding'), content: document.getElementById('tabContentPadding') },
+                { btn: document.getElementById('tabBtnBorder'), content: document.getElementById('tabContentBorder') },
+                { btn: document.getElementById('tabBtnRadius'), content: document.getElementById('tabContentRadius') }
+            ];
+
+            // Tab Switching Logic
+            tabs.forEach(tab => {
+                tab.btn.addEventListener('click', () => {
+                    tabs.forEach(t => {
+                        t.btn.classList.remove('active');
+                        t.content.classList.add('hidden');
+                    });
+                    tab.btn.classList.add('active');
+                    tab.content.classList.remove('hidden');
+                });
+            });
+
+            // Mode insights mapping
+            const modeInsights = {
+                'block': {
+                    title: 'Block Layout Engine',
+                    desc: 'Block elements break onto new lines and occupy available container width by default. Explicit widths, heights, padding, and margins are fully respected on all four sides.'
+                },
+                'inline-block': {
+                    title: 'Inline-Block Hybrid Layout',
+                    desc: 'Inline-block elements flow side-by-side with surrounding inline text, while honoring explicit width, height, padding, and margin properties.'
+                },
+                'inline': {
+                    title: 'Inline Element Rules & Limitations',
+                    desc: 'Inline elements wrap with document text. NOTICE: Explicit width and height are IGNORED! Vertical margins have no effect on line height, and vertical padding does not shift surrounding line flow.'
+                }
+            };
+
+            // Main Update & Sync Function
+            function updateAll() {
+                // 1. Label text updates
+                valWidth.textContent = state.autoWidth ? 'auto' : `${state.width}px`;
+                valHeight.textContent = state.autoHeight ? 'auto' : `${state.height}px`;
+
+                valMarginTop.textContent = `${state.margin.top}px`;
+                valMarginRight.textContent = `${state.margin.right}px`;
+                valMarginBottom.textContent = `${state.margin.bottom}px`;
+                valMarginLeft.textContent = `${state.margin.left}px`;
+
+                valPaddingTop.textContent = `${state.padding.top}px`;
+                valPaddingRight.textContent = `${state.padding.right}px`;
+                valPaddingBottom.textContent = `${state.padding.bottom}px`;
+                valPaddingLeft.textContent = `${state.padding.left}px`;
+
+                valBorderTop.textContent = `${state.border.top}px`;
+                valBorderRight.textContent = `${state.border.right}px`;
+                valBorderBottom.textContent = `${state.border.bottom}px`;
+                valBorderLeft.textContent = `${state.border.left}px`;
+
+                const radiusUnit = state.radiusPercent ? '%' : 'px';
+                valRadius.textContent = `${state.radius}${radiusUnit}`;
+
+                activeDisplayBadge.textContent = state.display;
+                activeSizingBadge.textContent = state.boxSizing;
+
+                // 2. Display Property on Sandbox Wrapper & Box
+                box1MarginWrapper.style.display = state.display;
+                box1.style.display = state.display;
+                box2.style.display = state.display;
+
+                // 3. Apply Box-Sizing & Dimensions
+                box1.style.boxSizing = state.boxSizing;
+
+                if (state.display === 'inline') {
+                    box1.style.width = 'auto';
+                    box1.style.height = 'auto';
+                    box1Content.style.width = 'auto';
+                    box1Content.style.height = 'auto';
+                } else {
+                    box1.style.width = state.autoWidth ? 'auto' : `${state.width}px`;
+                    box1.style.height = state.autoHeight ? 'auto' : `${state.height}px`;
+                    box1Content.style.width = '100%';
+                    box1Content.style.height = '100%';
+                }
+
+                // 4. Apply Per-side Paddings
+                box1.style.paddingTop = `${state.padding.top}px`;
+                box1.style.paddingRight = `${state.padding.right}px`;
+                box1.style.paddingBottom = `${state.padding.bottom}px`;
+                box1.style.paddingLeft = `${state.padding.left}px`;
+
+                // 5. Apply Per-side Borders
+                box1.style.borderTopWidth = `${state.border.top}px`;
+                box1.style.borderRightWidth = `${state.border.right}px`;
+                box1.style.borderBottomWidth = `${state.border.bottom}px`;
+                box1.style.borderLeftWidth = `${state.border.left}px`;
+                box1.style.borderStyle = 'solid';
+
+                // 6. Apply Border Radius
+                const radStr = `${state.radius}${radiusUnit}`;
+                box1.style.borderRadius = radStr;
+                box1Content.style.borderRadius = state.radiusPercent ? '50%' : `${Math.max(0, state.radius - 2)}px`;
+
+                // 7. Apply Outer Margins onto Overlay Wrapper
+                box1MarginWrapper.style.paddingTop = `${state.margin.top}px`;
+                box1MarginWrapper.style.paddingRight = `${state.margin.right}px`;
+                box1MarginWrapper.style.paddingBottom = `${state.margin.bottom}px`;
+                box1MarginWrapper.style.paddingLeft = `${state.margin.left}px`;
+                box1MarginWrapper.style.borderRadius = radStr;
+
+                // 8. Update Concentric Diagram Values
+                diagMarginLeft.textContent = state.margin.left;
+                diagMarginRight.textContent = state.margin.right;
+                diagMarginBottom.textContent = state.margin.bottom;
+
+                diagBorderLeft.textContent = state.border.left;
+                diagBorderRight.textContent = state.border.right;
+                diagBorderBottom.textContent = state.border.bottom;
+
+                diagPaddingLeft.textContent = state.padding.left;
+                diagPaddingRight.textContent = state.padding.right;
+                diagPaddingBottom.textContent = state.padding.bottom;
+
+                diagContentDim.textContent = `${state.autoWidth ? 'auto' : state.width} × ${state.autoHeight ? 'auto' : state.height}`;
+
+                // 9. Calculate Footprint
+                calculateMetrics();
+
+                // 10. Update Insight Banner
+                document.getElementById('insightTitle').textContent = modeInsights[state.display].title;
+                document.getElementById('insightDesc').textContent = modeInsights[state.display].desc;
+
+                // 11. Generate CSS Code
+               generateCSS();
+            }
+
+            // Calculation Engine
+            function calculateMetrics() {
+                let renderWidth = state.width;
+                let renderHeight = state.height;
+
+                if (state.display === 'inline') {
+                    renderWidth = box1.offsetWidth || (state.width + state.padding.left + state.padding.right + state.border.left + state.border.right);
+                    renderHeight = box1.offsetHeight || (state.height + state.padding.top + state.padding.bottom + state.border.top + state.border.bottom);
+                } else if (state.boxSizing === 'content-box') {
+                    renderWidth = (state.autoWidth ? 120 : state.width) + state.padding.left + state.padding.right + state.border.left + state.border.right;
+                    renderHeight = (state.autoHeight ? 40 : state.height) + state.padding.top + state.padding.bottom + state.border.top + state.border.bottom;
+                } else { // border-box
+                    renderWidth = state.autoWidth ? 120 : Math.max(state.width, state.padding.left + state.padding.right + state.border.left + state.border.right);
+                    renderHeight = state.autoHeight ? 40 : Math.max(state.height, state.padding.top + state.padding.bottom + state.border.top + state.border.bottom);
+                }
+
+                calcOuterSize.textContent = `${renderWidth}px × ${renderHeight}px`;
+
+                const footprintW = renderWidth + state.margin.left + state.margin.right;
+                constfootprintH = renderHeight + state.margin.top + state.margin.bottom;
+                calcTotalFootprint.textContent = `${footprintW}px × ${footprintH}px`;
+            }
+
+            // Code Output Generator
+            function generateCSS() {
+                let css = `<span class="token-selector">#box1</span> {\n`;
+                css += `  <span class="token-prop">display</span>: <span class="token-val">${state.display}</span>;\n`;
+                css += `  <span class="token-prop">box-sizing</span>: <spn class="token-val">${state.boxSizing}</span>;\n`;
+
+                if (state.display !== 'inline') {
+                    css += `  <span class="token-prop">width</span>: <span class="token-val">${state.autoWidth ? 'auto' : state.width + 'px'}</span>;\n`;
+                    css += `  <span class="token-prop">height</span>: <span class="token-val">${state.autoHeight ? 'auto' : state.height + 'px'}</span>;\n`;
+                }
+
+                // Shorthand padding check
+                const { top: pt, right: pr, bottom: pb, left: pl } = state.padding;
+                if (pt === pr && pr === pb && pb === pl) {
+                    css += `  <span class="token-prop">padding</span>: <span class="token-val">${pt}px</span>;\n`;
+                } else {
+                    css += `  <span class="token-prop">padding</span>: <span class="token-val">${pt}px ${pr}px ${pb}px ${pl}px</span>;\n`;
+                }
+
+                // Shorthand border width check
+                const { top: bt, right: br, bottom: bb, left: bl } = state.border;
+                if (bt === br && br === bb && bb === bl) {
+                    css += `  <span class="token-prop">border</span>: <span class="token-val">${bt}px solid #f59e0b</span>;\n`;
+                } else {
+                    css += `  <span class="token-prop">border-style</span>: <span class="token-val">solid</span>;\n`;
+                    css += `  <span class="token-prop">border-color</span>: <span class="token-val">#f59e0b</span>;\n`;
+                    css += `  <span class="token-prop">border-width</span>: <span class="token-val">${bt}px ${br}px ${bb}px ${bl}px</span>;\n`;
+                }
+
+                // Shorthand margin check
+                const { top: mt, right: mr, bottom: mb, left: ml } = state.margin;
+                if (mt === mr && mr === mb && mb === ml) {
+                    css += `  <span class="token-prop">margin</span>: <span class="token-val">${mt}px</span>;\n`;
+                } else {
+                    css += `  <span class="token-prop">margin</span>: <span class="token-val">${mt}px ${mr}px ${mb}px ${ml}px</span>;\n`;
+                }
+
+                if (state.radius > 0 || state.radiusPercent) {
+                    const rVal = `${state.radius}${state.radiusPercent ? '%' : 'px'}`;
+                    css += `  <span class="token-prop">border-radius</span>: <span class="token-val">${rVal}</span>;\n`;
+                }
+
+                css += `}`;
+                cssOutputCode.innerHTML = css;
+            }
+
+            // Input Handlers
+            selectDisplay.addEventListener('change', (e) => { state.display = e.target.value; updateAll(); });
+            selectBoxSizing.addEventListener('change', (e) => { state.boxSizing = e.target.value; updateAll(); });
+
+            rangeWidth.addEventListener('input', (e) => { state.width = parseInt(e.target.value); updateAll(); });
+            rangeHeight.addEventListener('input', (e) => { state.height = parseInt(e.target.value); updateAll(); });
+
+            checkAutoWidth.addEventListener('change', (e) => {
+                state.autoWidth = e.target.checked;
+                rangeWidth.disabled = state.autoWidth;
+                updateAll();
+            });
+
+            checkAutoHeight.addEventListener('change', (e) => {
+                state.autoHeight = e.target.checked;
+                rangeHeight.disabled = state.autoHeight;
+                updateAll();
+            });
+
+            // Margin Lock Toggle
+            lockMarginBtn.addEventListener('click', () => {
+                state.marginLocked = !state.marginLocked;
+                lockMarginIcon.className = state.marginLocked ? "fa-solid fa-lock text-rose-400" : "fa-solid fa-unlock text-slate-500";
+                lockMarginText.textContent = state.marginLocked ? "Sides Linked" : "Sides Unlinked";
+            });
+
+            // Margin Slider Listener Utility
+            const handleMarginChange = (side, val) => {
+                const num = parseInt(val);
+                if (state.marginLocked) {
+                    state.margin = { top: num, right: num, bottom: num, left: num };
+                    rangeMarginTop.value = num;
+                    rangeMarginRight.value = num;
+                    rangeMarginBottom.value = num;
+                    rangeMarginLeft.value = num;
+                } else {
+                    state.margin[side] = num;
+                }
+                updateAll();
+            };
+
+            rangeMarginTop.addEventListener('input', (e) => handleMarginChange('top', e.target.value));
+            rangeMarginRight.addEventListener('input', (e) => handleMarginChange('right', e.target.value));
+            rangeMarginBottom.addEventListener('input', (e) => handleMarginChange('bottom', e.target.value));
+            rangeMarginLeft.addEventListener('input', (e) => handleMarginChange('left', e.target.value));
+
+            // Padding Lock Toggle
+            lockPaddingBtn.addEventListener('click', () => {
+                state.paddingLocked = !state.paddingLocked;
+                lockPaddingIcon.className = state.paddingLocked ? "fa-solid fa-lock text-emerald-400" : "fa-solid fa-unlock text-slate-500";
+                lockPaddingText.textContent = state.paddingLocked ? "Sides Linked" : "Sides Unlinked";
+            });
+
+            const handlePaddingChange = (side, val) => {
+                const num = parseInt(val);
+                if (state.paddingLocked) {
+                    state.padding = { top: num, right: num, bottom: num, left: num };
+                    rangePaddingTop.value = num;
+                    rangePaddingRight.value = num;
+                    rangePaddingBottom.value = num;
+                    rangePaddingLeft.value = num;
+                } else {
+                    state.padding[side] = num;
+                }
+                updateAll();
+            };
+
+            rangePaddingTop.addEventListener('input', (e) => handlePaddingChange('top', e.target.value));
+            rangePaddingRight.addEventListener('input', (e) => handlePaddingChange('right', e.target.value));
+            rangePaddingBottom.addEventListener('input', (e) => handlePaddingChange('bottom', e.target.value));
+            rangePaddingLeft.addEventListener('input', (e) => handlePaddingChange('left', e.target.value));
+
+            // Border Lock Toggle
+            lockBorderBtn.addEventListener('click', () => {
+                state.borderLocked = !state.borderLocked;
+                lockBorderIcon.className = state.borderLocked ? "fa-solid fa-lock text-amber-400" : "fa-solid fa-unlock text-slate-500";
+                lockBorderText.textContent = state.borderLocked ? "Sides Linked" : "Sides Unlinked";
+            });
+
+            const handleBorderChange = (side, val) => {
+                const num = parseInt(val);
+                if (state.borderLocked) {
+                    state.border = { top: num, right: num, bottom: num, left: num };
+                    rangeBorderTop.value = num;
+                    rangeBorderRight.value = num;
+                    rangeBorderBottom.value = num;
+                    rangeBorderLeft.value = num;
+                } else {
+                    state.border[side] = num;
+                }
+                updateAll();
+            };
+
+            rangeBorderTop.addEventListener('input', (e) => handleBorderChange('top', e.target.value));
+            rangeBorderRight.addEventListener('input', (e) => handleBorderChange('right', e.target.value));
+            rangeBorderBottom.addEventListener('input', (e) => handleBorderChange('bottom', e.target.value));
+            rangeBorderLeft.addEventListener('input', (e) => handleBorderChange('left', e.target.value));
+
+            // Radius Handlers
+            rangeRadius.addEventListener('input', (e) => {
+                state.radius = parseInt(e.target.value);
+                updateAll();
+            });
+
+            checkRadiusPercent.addEventListener('change', (e) => {
+                state.radiusPercent = e.target.checked;
+                updateAll();
+            });
+
+            // Presets
+            presetCard.addEventListener('click', () => {
+                state.display = 'block';
+                state.boxSizing = 'border-box';
+                state.width = 240;
+                state.height = 120;
+                state.margin = { top: 20, right: 20, bottom: 20, left: 20 };
+                state.padding = { top: 24, right: 24, bottom: 24, left: 24 };
+                state.border = { top: 2, right: 2, bottom: 2, left: 2 };
+                state.radius = 12;
+                state.radiusPercent = false;
+                syncInputs();
+                updateAll();
+            });
+
+            presetAsymmetric.addEventListener('click', () => {
+                state.display = 'inline-block';
+                state.boxSizing = 'content-box';
+                state.width = 180;
+                state.height = 90;
+                state.margin = { top: 10, right: 30, bottom: 10, left: 10 };
+                state.padding = { top: 8, right: 24, bottom: 8, left: 12 };
+                state.border = { top: 1, right: 8, bottom: 1, left: 1 };
+                state.radius = 16;
+                state.radiusPercent = false;
+                syncInputs();
+                updateAll();
+            });
+
+            presetInline.addEventListener('click', () => {
+                state.display = 'inline';
+                state.boxSizing = 'content-box';
+                state.margin = { top: 5, right: 12, bottom: 5, left: 12 };
+                state.padding = { top: 6, right: 14, bottom: 6, left: 14 };
+                state.border = { top: 2, right: 2, bottom: 2, left: 2 };
+                state.radius = 50;
+                state.radiusPercent = true;
+                syncInputs();
+                updateAll();
+            });
+
+            resetBtn.addEventListener('click', () => {
+                state.display = 'block';
+                state.boxSizing = 'content-box';
+                state.autoWidth = false;
+                state.autoHeight = false;
+                state.width = 180;
+                state.height = 80;
+                state.margin = { top: 16, right: 16, bottom: 16, left: 16 };
+                state.padding = { top: 20, right: 20, bottom: 20, left: 20 };
+                state.border = { top: 4, right: 4, bottom: 4, left: 4 };
+                state.radius = 8;
+                state.radiusPercent = false;
+                syncInputs();
+                updateAll();
+            });
+
+            function syncInputs() {
+                selectDisplay.value = state.display;
+                selectBoxSizing.value = state.boxSizing;
+                
+                checkAutoWidth.checked = state.autoWidth;
+                checkAutoHeight.checked = state.autoHeight;
+                rangeWidth.value = state.width;
+                rangeHeight.value = state.height;
+
+                rangeMarginTop.value = state.margin.top;
+                rangeMarginRight.value = state.margin.right;
+                rangeMarginBottom.value = state.margin.bottom;
+                rangeMarginLeft.value = state.margin.left;
+
+                rangePaddingTop.value = state.padding.top;
+                rangePaddingRight.value = state.padding.right;
+                rangePaddingBottom.value = state.padding.bottom;
+                rangePaddingLeft.value = state.padding.left;
+
+                rangeBorderTop.value = state.border.top;
+                rangeBorderRight.value = state.border.right;
+                rangeBorderBottom.value = state.border.bottom;
+                rangeBorderLeft.value = state.border.left;
+
+                rangeRadius.value = state.radius;
+                checkRadiusPercent.checked = state.radiusPercent;
+            }
+
+            // Copy CSS Button
+            copyCssBtn.addEventListener('click', () => {
+                const text = cssOutputCode.innerText;
+                const tempTextarea = document.createElement('textarea');
+                tempTextarea.value = text;
+                document.body.appendChild(tempTextarea);
+                tempTextarea.select();
+                document.execCommand('copy');
+                document.body.removeChild(tempTextarea);
+
+                const originalBtnText = copyCssBtn.innerHTML;
+                copyCssBtn.innerHTML = `<i class="fa-solid fa-check text-emerald-400"></i> Copied!`;
+                setTimeout(() => {
+                    copyCssBtn.innerHTML = originalBtnText;
+                }, 1800);
+            });
+
+            // Initialize App
+            syncInputs();
+            updateAll();
+        });
+    </script>
+</body>
+</html>

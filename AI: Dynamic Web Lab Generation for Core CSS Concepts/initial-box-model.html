@@ -1,0 +1,620 @@
+<!DOCTYPE html>
+<html lang="en" class="dark">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>CSS Box Model & Display Explorer</title>
+
+    <!-- Tailwind CSS CDN -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <!-- FontAwesome Icons CDN -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+
+    <script>
+        tailwind.config = {
+            darkMode: 'class',
+            theme: {
+                extend: {
+                    colors: {
+                        boxContent: '#3b82f6',  /* Blue */
+                        boxPadding: '#10b981',  /* Emerald */
+                        boxBorder: '#f59e0b',   /* Amber */
+                        boxMargin: '#ef4444',   /* Red */
+                    }
+                }
+            }
+        }
+    </script>
+
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=Fira+Code:wght@400;500&display=swap');
+
+        body {
+            font-family: 'Inter', sans-serif;
+        }
+
+        code, pre {
+            font-family: 'Fira Code', monospace;
+        }
+
+        /* Range input thumb style */
+        input[type=range] {
+            -webkit-appearance: none;
+            background: transparent;
+        }
+        input[type=range]::-webkit-slider-thumb {
+            -webkit-appearance: none;
+            height: 16px;
+            width: 16px;
+            border-radius: 50%;
+            background: #3b82f6;
+            cursor: pointer;
+            margin-top: -5px;
+            box-shadow: 0 0 8px rgba(59, 130, 246, 0.5);
+            transition: all 0.15s ease;
+        }
+        input[type=range]::-webkit-slider-thumb:hover {
+            transform: scale(1.25);
+            background: #60a5fa;
+        }
+        input[type=range]::-webkit-slider-runnable-track {
+            width: 100%;
+            height: 6px;
+            cursor: pointer;
+            background: #374151;
+            border-radius: 3px;
+        }
+
+        /* CSS code syntax token highlighting */
+        .token-prop { color: #93c5fd; }
+        .token-val { color: #fca5a5; }
+        .token-selector { color: #fde047; }
+        .token-comment { color: #6b7280; font-style: italic; }
+
+        /* Box 1 Outer Margin Overlay Indicator */
+        .box1-margin-wrapper {
+            background-color: rgba(239, 68, 68, 0.15);
+            border: 1px dashed rgba(239, 68, 68, 0.5);
+            transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+        }
+
+        /* Box 1 Target element */
+        #box1 {
+            transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+            background-color: rgba(16, 185, 129, 0.25); /* Padding area visualizer */
+        }
+
+        .box1-content-inner {
+            background-color: rgba(59, 130, 246, 0.85);
+            transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+        }
+    </style>
+</head>
+<body class="bg-slate-950 text-slate-100 min-h-screen flex flex-col antialiased">
+
+    <!-- Top Navigation Header -->
+    <header class="border-b border-slate-800 bg-slate-900/90 backdrop-blur sticky top-0 z-50">
+        <div class="max-w-7xl mx-auto px-4 py-3 sm:px-6 lg:px-8 flex items-center justify-between">
+            <div class="flex items-center space-x-3">
+                <div class="p-2 bg-gradient-to-tr from-blue-500/20 to-emerald-500/20 text-blue-400 rounded-lg border border-blue-500/30">
+                    <i class="fa-solid fa-cube text-xl"></i>
+                </div>
+                <div>
+                    <h1 class="font-bold text-lg text-white leading-tight">CSS Box Model & Display Explorer</h1>
+                    <p class="text-xs text-slate-400">Interactive Layout Engine & Dimension Visualizer</p>
+                </div>
+            </div>
+            <div class="flex items-center space-x-3">
+                <button id="resetBtn" class="text-xs bg-slate-800 hover:bg-slate-700 text-slate-300 hover:text-white px-3 py-1.5 rounded-lg border border-slate-700 transition flex items-center gap-1.5">
+                    <i class="fa-solid fa-rotate-left"></i> Reset Defaults
+                </button>
+            </div>
+        </div>
+    </header>
+
+    <main class="flex-1 max-w-7xl w-full mx-auto p-4 sm:p-6 lg:p-8 grid grid-cols-1 lg:grid-cols-12 gap-6">
+
+        <!-- Left Column: Control Panel -->
+        <section class="lg:col-span-5 flex flex-col gap-5">
+            
+            <div class="bg-slate-900 border border-slate-800 rounded-xl p-5 shadow-xl space-y-5">
+                
+                <div class="flex items-center justify-between border-b border-slate-800 pb-3">
+                    <h2 class="text-xs font-semibold uppercase tracking-wider text-slate-400 flex items-center gap-2">
+                        <i class="fa-solid fa-sliders text-blue-400"></i> Box 1 Properties Control
+                    </h2>
+                    <span id="activeDisplayBadge" class="text-xs font-mono font-bold text-blue-400 bg-blue-950/60 border border-blue-500/30 px-2 py-0.5 rounded">
+                        display: block
+                    </span>
+                </div>
+
+                <!-- Display & Box-Sizing Dropdowns -->
+                <div class="grid grid-cols-2 gap-3">
+                    <div class="space-y-1.5">
+                        <label for="selectDisplay" class="text-xs font-medium text-slate-300 flex justify-between">
+                            <span>display</span>
+                            <i class="fa-solid fa-eye text-[10px] text-slate-500"></i>
+                        </label>
+                        <select id="selectDisplay" class="w-full bg-slate-950 border border-slate-800 text-slate-200 text-xs rounded-lg p-2.5 focus:border-blue-500 focus:ring-1 focus:ring-blue-500 outline-none transition">
+                            <option value="block" selected>block</option>
+                            <option value="inline-block">inline-block</option>
+                            <option value="inline">inline</option>
+                        </select>
+                    </div>
+
+                    <div class="space-y-1.5">
+                        <label for="selectBoxSizing" class="text-xs font-medium text-slate-300 flex justify-between">
+                            <span>box-sizing</span>
+                            <i class="fa-solid fa-vector-square text-[10px] text-slate-500"></i>
+                        </label>
+                        <select id="selectBoxSizing" class="w-full bg-slate-950 border border-slate-800 text-slate-200 text-xs rounded-lg p-2.5 focus:border-blue-500 focus:ring-1 focus:ring-blue-500 outline-none transition">
+                            <option value="content-box" selected>content-box (default)</option>
+                            <option value="border-box">border-box</option>
+                        </select>
+                    </div>
+                </div>
+
+                <!-- Sliders Section -->
+                <div class="space-y-4 pt-2 border-t border-slate-800">
+                    
+                    <!-- Content Width -->
+                    <div class="space-y-1">
+                        <div class="flex justify-between text-xs">
+                            <label for="rangeWidth" class="font-medium text-blue-400 flex items-center gap-1.5">
+                                <span class="w-2.5 h-2.5 rounded-full bg-blue-500 inline-block"></span> Content Width
+                            </label>
+                            <span id="widthVal" class="font-mono text-blue-400 font-semibold">180px</span>
+                        </div>
+                        <input id="rangeWidth" type="range" min="50" max="400" value="180" class="w-full">
+                    </div>
+
+                    <!-- Content Height -->
+                    <div class="space-y-1">
+                        <div class="flex justify-between text-xs">
+                            <label for="rangeHeight" class="font-medium text-blue-400 flex items-center gap-1.5">
+                                <span class="w-2.5 h-2.5 rounded-full bg-blue-500 inline-block"></span> Content Height
+                            </label>
+                            <span id="heightVal" class="font-mono text-blue-400 font-semibold">80px</span>
+                        </div>
+                        <input id="rangeHeight" type="range" min="40" max="200" value="80" class="w-full">
+                    </div>
+
+                    <!-- Padding Slider -->
+                    <div class="space-y-1">
+                        <div class="flex justify-between text-xs">
+                            <label for="rangePadding" class="font-medium text-emerald-400 flex items-center gap-1.5">
+                                <span class="w-2.5 h-2.5 rounded-full bg-emerald-500 inline-block"></span> Padding (all sides)
+                            </label>
+                            <span id="paddingVal" class="font-mono text-emerald-400 font-semibold">20px</span>
+                        </div>
+                        <input id="rangePadding" type="range" min="0" max="60" value="20" class="w-full">
+                    </div>
+
+                    <!-- Border Width Slider -->
+                    <div class="space-y-1">
+                        <div class="flex justify-between text-xs">
+                            <label for="rangeBorder" class="font-medium text-amber-400 flex items-center gap-1.5">
+                                <span class="w-2.5 h-2.5 rounded-full bg-amber-500 inline-block"></span> Border Width
+                            </label>
+                            <span id="borderVal" class="font-mono text-amber-400 font-semibold">4px</span>
+                        </div>
+                        <input id="rangeBorder" type="range" min="0" max="30" value="4" class="w-full">
+                    </div>
+
+                    <!-- Margin Slider -->
+                    <div class="space-y-1">
+                        <div class="flex justify-between text-xs">
+                            <label for="rangeMargin" class="font-medium text-rose-400 flex items-center gap-1.5">
+                                <span class="w-2.5 h-2.5 rounded-full bg-rose-500 inline-block"></span> Margin (all sides)
+                            </label>
+                            <span id="marginVal" class="font-mono text-rose-400 font-semibold">16px</span>
+                        </div>
+                        <input id="rangeMargin" type="range" min="0" max="60" value="16" class="w-full">
+                    </div>
+
+                    <!-- Border Radius Slider -->
+                    <div class="space-y-1">
+                        <div class="flex justify-between text-xs">
+                            <label for="rangeRadius" class="font-medium text-purple-400 flex items-center gap-1.5">
+                                <i class="fa-regular fa-circle text-[10px]"></i> Border Radius
+                            </label>
+                            <span id="radiusVal" class="font-mono text-purple-400 font-semibold">8px</span>
+                        </div>
+                        <input id="rangeRadius" type="range" min="0" max="50" value="8" class="w-full">
+                    </div>
+
+                </div>
+
+            </div>
+
+            <!-- Live Calculated Metrics Box -->
+            <div class="bg-slate-900 border border-slate-800 rounded-xl p-4 shadow-xl space-y-3">
+                <h3 class="text-xs font-semibold uppercase tracking-wider text-slate-400 flex items-center gap-2">
+                    <i class="fa-solid fa-calculator text-blue-400"></i> Rendered Footprint Metrics
+                </h3>
+
+                <div class="grid grid-cols-2 gap-2 text-xs font-mono">
+                    <div class="bg-slate-950 p-2.5 rounded-lg border border-slate-800/80">
+                        <span class="text-slate-500 block text-[10px] uppercase">Outer Element Width</span>
+                        <span id="calcOuterWidth" class="text-white font-bold text-sm">228px</span>
+                        <span id="calcWidthFormula" class="text-[10px] text-slate-400 block mt-0.5">180 + 40 + 8</span>
+                    </div>
+
+                    <div class="bg-slate-950 p-2.5 rounded-lg border border-slate-800/80">
+                        <span class="text-slate-500 block text-[10px] uppercase">Outer Element Height</span>
+                        <span id="calcOuterHeight" class="text-white font-bold text-sm">128px</span>
+                        <span id="calcHeightFormula" class="text-[10px] text-slate-400 block mt-0.5">80 + 40 + 8</span>
+                    </div>
+
+                    <div class="col-span-2 bg-slate-950 p-2.5 rounded-lg border border-slate-800/80 flex justify-between items-center">
+                        <span class="text-slate-400 text-[11px]">Total Layout Footprint (with margins):</span>
+                        <span id="calcTotalFootprint" class="text-rose-400 font-bold text-xs">260px × 160px</span>
+                    </div>
+                </div>
+            </div>
+
+        </section>
+
+        <!-- Right Column: Visual Canvas & Insights -->
+        <section class="lg:col-span-7 flex flex-col gap-5">
+
+            <!-- Contextual Educational Insight Banner -->
+            <div id="insightBanner" class="bg-blue-950/30 border border-blue-500/30 rounded-xl p-4 flex gap-3 items-start transition-all">
+                <i class="fa-solid fa-lightbulb text-blue-400 text-lg mt-0.5 shrink-0"></i>
+                <div>
+                    <h3 id="insightTitle" class="text-sm font-semibold text-blue-200">Block Element Flow</h3>
+                    <p id="insightDesc" class="text-xs text-slate-300 mt-0.5 leading-relaxed">
+                        Block elements take up 100% of available line width by default and force following elements to break onto a new line. Explicit width, height, padding, and margins are fully respected.
+                    </p>
+                </div>
+            </div>
+
+            <!-- Visual Legend Bar -->
+            <div class="bg-slate-900 border border-slate-800 rounded-xl p-3 shadow-xl flex flex-wrap gap-4 text-xs font-mono justify-around items-center">
+                <span class="flex items-center gap-1.5">
+                    <span class="w-3 h-3 rounded bg-blue-500 inline-block"></span>
+                    <span class="text-slate-300">Content</span>
+                </span>
+                <span class="flex items-center gap-1.5">
+                    <span class="w-3 h-3 rounded bg-emerald-500 inline-block"></span>
+                    <span class="text-slate-300">Padding</span>
+                </span>
+                <span class="flex items-center gap-1.5">
+                    <span class="w-3 h-3 rounded bg-amber-500 inline-block"></span>
+                    <span class="text-slate-300">Border</span>
+                </span>
+                <span class="flex items-center gap-1.5">
+                    <span class="w-3 h-3 rounded bg-rose-500/50 border border-rose-500 border-dashed inline-block"></span>
+                    <span class="text-slate-300">Margin Area</span>
+                </span>
+            </div>
+
+            <!-- Interactive Playground Canvas Container -->
+            <div class="bg-slate-900 border border-slate-800 rounded-xl p-5 shadow-xl flex flex-col min-h-[380px]">
+                
+                <div class="flex justify-between items-center mb-3 text-xs text-slate-400 border-b border-slate-800 pb-2">
+                    <span class="flex items-center gap-2 font-mono">
+                        <i class="fa-solid fa-laptop-code text-blue-400"></i> Document Flow Canvas
+                    </span>
+                    <span class="font-mono text-[11px] text-slate-500">parent width: 100%</span>
+                </div>
+
+                <!-- Outer Document Sandbox Area -->
+                <div class="flex-1 bg-slate-950 rounded-xl border-2 border-dashed border-slate-800 p-6 overflow-auto min-h-[280px] leading-relaxed text-slate-400 text-sm">
+                    
+                    <span>Sample prefix text flow before elements. </span>
+
+                    <!-- Outer Margin Visualizer Wrapper for Box 1 -->
+                    <div id="box1MarginWrapper" class="box1-margin-wrapper inline-block rounded-lg p-0 align-top">
+                        
+                        <!-- Box 1 Element (Main Target) -->
+                        <div id="box1" class="border-amber-500 text-white font-semibold font-mono text-xs shadow-lg relative">
+                            <!-- Inner Content Area -->
+                            <div id="box1Content" class="box1-content-inner h-full w-full flex items-center justify-center p-2 text-center select-none rounded">
+                                <span>Box 1 (Controlled)</span>
+                            </div>
+                        </div>
+
+                    </div>
+
+                    <!-- Box 2 Reference Element -->
+                    <div id="box2" class="bg-slate-800 border-2 border-slate-600 text-slate-200 font-mono text-xs font-semibold p-4 rounded-lg inline-block align-top shadow-md my-2">
+                        Box 2 (Reference Neighbor)
+                    </div>
+
+                    <span> Suffix text flow demonstrating how surrounding DOM inline content wraps around elements in standard layout flow.</span>
+
+                </div>
+
+                <div class="mt-3 pt-2 text-[11px] text-slate-500 flex items-center justify-between">
+                    <span><i class="fa-solid fa-circle-info text-blue-400"></i> Red dashed boundary highlights active margin space around Box 1</span>
+                </div>
+            </div>
+
+            <!-- Generated CSS Snippet Box -->
+            <div class="bg-slate-900 border border-slate-800 rounded-xl p-4 shadow-xl space-y-2">
+                <div class="flex justify-between items-center">
+                    <span class="text-xs font-semibold uppercase tracking-wider text-slate-400 flex items-center gap-1.5">
+                        <i class="fa-solid fa-code text-blue-400"></i> Active CSS Rule for Box 1
+                    </span>
+                    <button id="copyCssBtn" class="text-xs text-slate-400 hover:text-white flex items-center gap-1.5 bg-slate-800 hover:bg-slate-700 px-2.5 py-1 rounded-md border border-slate-700 transition">
+                        <i class="fa-regular fa-copy"></i> Copy CSS
+                    </button>
+                </div>
+                <pre class="bg-slate-950 p-3.5 rounded-lg text-xs font-mono text-slate-300 border border-slate-800/80 overflow-x-auto"><code id="cssOutputCode">#box1 { ... }</code></pre>
+            </div>
+
+        </section>
+
+    </main>
+
+    <script>
+        document.addEventListener('DOMContentLoaded', () => {
+            
+            // Core Box 1 State
+            const state = {
+                display: 'block',
+                boxSizing: 'content-box',
+                width: 180,
+                height: 80,
+                padding: 20,
+                border: 4,
+                margin: 16,
+                radius: 8
+            };
+
+            // DOM Controls
+            const selectDisplay = document.getElementById('selectDisplay');
+            const selectBoxSizing = document.getElementById('selectBoxSizing');
+            const rangeWidth = document.getElementById('rangeWidth');
+            const rangeHeight = document.getElementById('rangeHeight');
+            const rangePadding = document.getElementById('rangePadding');
+            const rangeBorder = document.getElementById('rangeBorder');
+            const rangeMargin = document.getElementById('rangeMargin');
+            const rangeRadius = document.getElementById('rangeRadius');
+
+            // DOM Value Display Labels
+            const widthVal = document.getElementById('widthVal');
+            const heightVal = document.getElementById('heightVal');
+            const paddingVal = document.getElementById('paddingVal');
+            const borderVal = document.getElementById('borderVal');
+            const marginVal = document.getElementById('marginVal');
+            const radiusVal = document.getElementById('radiusVal');
+            const activeDisplayBadge = document.getElementById('activeDisplayBadge');
+
+            // DOM Visual Targets
+            const box1 = document.getElementById('box1');
+            const box1Content = document.getElementById('box1Content');
+            const box1MarginWrapper = document.getElementById('box1MarginWrapper');
+            const box2 = document.getElementById('box2');
+
+            // Output Metrics & CSS Code
+            const calcOuterWidth = document.getElementById('calcOuterWidth');
+            const calcOuterHeight = document.getElementById('calcOuterHeight');
+            const calcWidthFormula = document.getElementById('calcWidthFormula');
+            const calcHeightFormula = document.getElementById('calcHeightFormula');
+            const calcTotalFootprint = document.getElementById('calcTotalFootprint');
+            const cssOutputCode = document.getElementById('cssOutputCode');
+            const copyCssBtn = document.getElementById('copyCssBtn');
+            const resetBtn = document.getElementById('resetBtn');
+
+            // Insight Elements
+            const insightTitle = document.getElementById('insightTitle');
+            const insightDesc = document.getElementById('insightDesc');
+
+            const modeInsights = {
+                'block': {
+                    title: 'Block Element Layout Flow',
+                    desc: 'Block elements break onto new lines and take full container width by default. Explicit width, height, padding, and margins are fully respected.'
+                },
+                'inline-block': {
+                    title: 'Inline-Block Hybrid Flow',
+                    desc: 'Inline-block elements flow side-by-side with text and neighbor elements like inline items, but honor explicit width, height, padding, and margins like block elements.'
+                },
+                'inline': {
+                    title: 'Inline Layout Rules & Limitations',
+                    desc: 'Inline elements wrap with text. NOTICE: Explicit width and height are IGNORED! Vertical margins have no effect, and vertical padding does NOT shift surrounding text flow.'
+                }
+            };
+
+            // Main Render Function
+            function updatePlayground() {
+                // 1. Update text badges
+                widthVal.textContent = `${state.width}px`;
+                heightVal.textContent = `${state.height}px`;
+                paddingVal.textContent = `${state.padding}px`;
+                borderVal.textContent = `${state.border}px`;
+                marginVal.textContent = `${state.margin}px`;
+                radiusVal.textContent = `${state.radius}px`;
+                activeDisplayBadge.textContent = `display: ${state.display}`;
+
+                // 2. Apply display property to wrapper and box1
+                if (state.display === 'block') {
+                    box1MarginWrapper.style.display = 'block';
+                    box1.style.display = 'block';
+                    box2.style.display = 'block';
+                } else if (state.display === 'inline-block') {
+                    box1MarginWrapper.style.display = 'inline-block';
+                    box1.style.display = 'inline-block';
+                    box2.style.display = 'inline-block';
+                } else if (state.display === 'inline') {
+                    box1MarginWrapper.style.display = 'inline';
+                    box1.style.display = 'inline';
+                    box2.style.display = 'inline';
+                }
+
+                // 3. Apply box-sizing, padding, border, radius to Box 1
+                box1.style.boxSizing = state.boxSizing;
+                box1.style.padding = `${state.padding}px`;
+                box1.style.borderWidth = `${state.border}px`;
+                box1.style.borderStyle = 'solid';
+                box1.style.borderRadius = `${state.radius}px`;
+                box1Content.style.borderRadius = `${Math.max(0, state.radius - 2)}px`;
+
+                // 4. Apply width & height rules based on display property
+                if (state.display === 'inline') {
+                    box1.style.width = 'auto';
+                    box1.style.height = 'auto';
+                    box1Content.style.width = 'auto';
+                    box1Content.style.height = 'auto';
+                    box1Content.style.minHeight = '0px';
+                } else {
+                    box1.style.width = `${state.width}px`;
+                    box1.style.height = `${state.height}px`;
+                    box1Content.style.width = '100%';
+                    box1Content.style.height = '100%';
+                }
+
+                // 5. Apply outer margin to wrapper for visible red overlay
+                box1MarginWrapper.style.padding = `${state.margin}px`;
+                box1MarginWrapper.style.borderRadius = `${state.radius + 4}px`;
+
+                // 6. Calculate Box Dimensions Breakdown
+                let outerW = state.width;
+                let outerH = state.height;
+
+                if (state.display === 'inline') {
+                    // Approximate DOM dimensions for inline rendering
+                    outerW = box1.offsetWidth || (state.width + (state.padding * 2) + (state.border * 2));
+                    outerH = box1.offsetHeight || (state.height + (state.padding * 2) + (state.border * 2));
+                    calcWidthFormula.textContent = `Auto content width + padding`;
+                    calcHeightFormula.textContent = `Auto line height + padding`;
+                } else if (state.boxSizing === 'content-box') {
+                    outerW = state.width + (state.padding * 2) + (state.border * 2);
+                    outerH = state.height + (state.padding * 2) + (state.border * 2);
+                    calcWidthFormula.textContent = `${state.width} + ${state.padding * 2} (pad) + ${state.border * 2} (border)`;
+                    calcHeightFormula.textContent = `${state.height} + ${state.padding * 2} (pad) + ${state.border * 2} (border)`;
+                } else { // border-box
+                    outerW = Math.max(state.width, (state.padding * 2) + (state.border * 2));
+                    outerH = Math.max(state.height, (state.padding * 2) + (state.border * 2));
+                    calcWidthFormula.textContent = `Fixed ${state.width}px (includes pad & border)`;
+                    calcHeightFormula.textContent = `Fixed ${state.height}px (includes pad & border)`;
+                }
+
+                calcOuterWidth.textContent = `${outerW}px`;
+                calcOuterHeight.textContent = `${outerH}px`;
+
+                const totalFootprintW = outerW + (state.margin * 2);
+                const totalFootprintH = outerH + (state.margin * 2);
+                calcTotalFootprint.textContent = `${totalFootprintW}px × ${totalFootprintH}px`;
+
+                // 7. Update Insight Banner
+                insightTitle.textContent = modeInsights[state.display].title;
+                insightDesc.textContent = modeInsights[state.display].desc;
+
+                // 8. Generate Code Output
+                generateCssCode();
+            }
+
+            function generateCssCode() {
+                let css = `<span class="token-selector">#box1</span> {\n`;
+                css += `  <span class="token-prop">display</span>: <span class="token-val">${state.display}</span>;\n`;
+                css += `  <span class="token-prop">box-sizing</span>: <span class="token-val">${state.boxSizing}</span>;\n`;
+                
+                if (state.display !== 'inline') {
+                    css += `  <span class="token-prop">width</span>: <span class="token-val">${state.width}px</span>;\n`;
+                    css += `  <span class="token-prop">height</span>: <span class="token-val">${state.height}px</span>;\n`;
+                } else {
+                    css += `  <span class="token-comment">/* width and height are ignored on inline elements */</span>\n`;
+                }
+
+                css += `  <span class="token-prop">padding</span>: <span class="token-val">${state.padding}px</span>;\n`;
+                css += `  <span class="token-prop">border</span>: <span class="token-val">${state.border}px solid #f59e0b</span>;\n`;
+                css += `  <span class="token-prop">margin</span>: <span class="token-val">${state.margin}px</span>;\n`;
+                
+                if (state.radius > 0) {
+                    css += `  <span class="token-prop">border-radius</span>: <span class="token-val">${state.radius}px</span>;\n`;
+                }
+                
+                css += `}`;
+
+                cssOutputCode.innerHTML = css;
+            }
+
+            // Event Listeners for Controls
+            selectDisplay.addEventListener('change', (e) => {
+                state.display = e.target.value;
+                updatePlayground();
+            });
+
+            selectBoxSizing.addEventListener('change', (e) => {
+                state.boxSizing = e.target.value;
+                updatePlayground();
+            });
+
+            rangeWidth.addEventListener('input', (e) => {
+                state.width = parseInt(e.target.value, 10);
+                updatePlayground();
+            });
+
+            rangeHeight.addEventListener('input', (e) => {
+                state.height = parseInt(e.target.value, 10);
+                updatePlayground();
+            });
+
+            rangePadding.addEventListener('input', (e) => {
+                state.padding = parseInt(e.target.value, 10);
+                updatePlayground();
+            });
+
+            rangeBorder.addEventListener('input', (e) => {
+                state.border = parseInt(e.target.value, 10);
+                updatePlayground();
+            });
+
+            rangeMargin.addEventListener('input', (e) => {
+                state.margin = parseInt(e.target.value, 10);
+                updatePlayground();
+            });
+
+            rangeRadius.addEventListener('input', (e) => {
+                state.radius = parseInt(e.target.value, 10);
+                updatePlayground();
+            });
+
+            // Copy CSS Button
+            copyCssBtn.addEventListener('click', () => {
+                const text = cssOutputCode.innerText;
+                const tempTextarea = document.createElement('textarea');
+                tempTextarea.value = text;
+                document.body.appendChild(tempTextarea);
+                tempTextarea.select();
+                document.execCommand('copy');
+                document.body.removeChild(tempTextarea);
+
+                const originalBtnText = copyCssBtn.innerHTML;
+                copyCssBtn.innerHTML = `<i class="fa-solid fa-check text-emerald-400"></i> Copied!`;
+                setTimeout(() => {
+                    copyCssBtn.innerHTML = originalBtnText;
+                }, 1800);
+            });
+
+            // Reset Button
+            resetBtn.addEventListener('click', () => {
+                state.display = 'block';
+                state.boxSizing = 'content-box';
+                state.width = 180;
+                state.height = 80;
+                state.padding = 20;
+                state.border = 4;
+                state.margin = 16;
+                state.radius = 8;
+
+                selectDisplay.value = 'block';
+                selectBoxSizing.value = 'content-box';
+                rangeWidth.value = 180;
+                rangeHeight.value = 80;
+                rangePadding.value = 20;
+                rangeBorder.value = 4;
+                rangeMargin.value = 16;
+                rangeRadius.value = 8;
+
+                updatePlayground();
+            });
+
+            // Initial Run
+            updatePlayground();
+        });
+    </script>
+</body>
+</html>
