@@ -1,0 +1,71 @@
+You are a senior Python backend engineer. Below is a procedural script that uses mysql.connector with raw SQL. Refactor it into a secure, professional SQLAlchemy ORM (2.0 style) version.
+
+Your response must:
+1. Define a User class as a SQLAlchemy declarative model (id, username unique, email) and keep all original functions (create, get by username, update email, delete, list) as ORM Session-based equivalents with validation and error handling.
+2. Show how to create the table, add a new user, and query for that user using the ORM Session.
+3. Explain in detail why the SQLAlchemy ORM version is more professional and secure than raw SQL with string formatting, covering SQL injection, maintainability, and abstraction.
+
+Keep the response compact enough to read in one screen capture.
+
+Here is the script:
+
+import mysql.connector
+from mysql.connector import Error
+
+
+def get_connection():
+    """Establish and return a database connection."""
+    return mysql.connector.connect(
+        host="localhost",
+        user="root",
+        password="yourpassword",
+        database="example_db"
+    )
+
+
+def create_user(db_cursor, username, email):
+    """Create a new user safely using parameterized queries."""
+    if not username or not email:
+        print("Username and email are required.")
+        return
+    sql = "INSERT INTO users (username, email) VALUES (%s, %s)"
+    try:
+        db_cursor.execute(sql, (username, email))
+        print(f"User '{username}' created successfully.")
+    except Error as e:
+        print(f"Error creating user: {e}")
+
+
+def get_user_by_username(db_cursor, username):
+    sql = "SELECT id, username, email FROM users WHERE username = %s"
+    try:
+        db_cursor.execute(sql, (username,))
+        return db_cursor.fetchone()
+    except Error as e:
+        print(f"Error fetching user: {e}")
+
+
+def update_user_email(db_cursor, username, new_email):
+    sql = "UPDATE users SET email = %s WHERE username = %s"
+    try:
+        db_cursor.execute(sql, (new_email, username))
+        print(f"Email updated for '{username}'.")
+    except Error as e:
+        print(f"Error updating user: {e}")
+
+
+def delete_user(db_cursor, username):
+    sql = "DELETE FROM users WHERE username = %s"
+    try:
+        db_cursor.execute(sql, (username,))
+        print(f"User '{username}' deleted.")
+    except Error as e:
+        print(f"Error deleting user: {e}")
+
+
+def list_users(db_cursor):
+    try:
+        db_cursor.execute("SELECT id, username, email FROM users")
+        return db_cursor.fetchall()
+    except Error as e:
+        print(f"Error listing users: {e}")
